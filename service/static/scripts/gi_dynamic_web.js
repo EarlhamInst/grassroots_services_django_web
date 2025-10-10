@@ -2658,13 +2658,16 @@ function display_result(json) {
 
                 // Initializing DataTables with a slight delay to ensure DOM is ready
                 setTimeout(() => {
-                $(safeId).DataTable({
-                    "searching": false,
-                    "ordering": false,
-                    "lengthChange": false,
-                    "aaSorting": []
-                });
-                console.log("Initialized DataTable for:", safeId);
+									// Make sure that the results section is visible
+									$("#status").show ();
+									
+	                $(safeId).DataTable({
+	                    "searching": false,
+	                    "ordering": false,
+	                    "lengthChange": false,
+	                    "aaSorting": []
+	                });
+	                console.log("Initialized DataTable for:", safeId);
                 }, 100); // Adjust timing if necessary
                 }
             } 
