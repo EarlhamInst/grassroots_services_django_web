@@ -421,7 +421,14 @@ function populateService(service_altname) {
             dataType: "json",
             success: function (json) {
                 populate_page_with_json(json, false);
-            }
+            },
+						complete: function (jqXHR, textStatus) {
+							console.log ("complete: textStatus " + textStatus);
+						}, 
+						error: function ( jqXHR, textStatus, errorThrown ) {
+							console.log ("complete: textStatus " + textStatus + " errorThrown: " + errorThrown);							
+						}
+						
         });
     }
 }

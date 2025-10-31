@@ -1,0 +1,181 @@
+{% include "header.html" %}
+
+{% csrf_token %}
+<section id="services" style="padding: 100px 0px 100px 0px ! important;">
+    <div class="container">
+        <div id="back_link" style="visibility: hidden;"><a href="."><< Back to all services list</a><br/></div>
+        <h2 id="title"></h2>
+
+        <p id="description"></p>
+
+        <p id="moreinfo"></p>
+        <div id="simpleAdvanceWrapper" style="display:none;">
+            <label class="radio-inline" style="margin-right: 20px;"><input type="radio" name="simpleadvanced"
+                                                                           value="show_simple"
+                                                                           onclick="simpleOrAdvanced(this.value)"
+                                                                           checked>
+                Simple options </label>
+            <label class="radio-inline"><input type="radio" name="simpleadvanced" value="show_advanced"
+                                               onclick="simpleOrAdvanced(this.value)"> Advanced options</label>
+        </div>
+        <form id="form" role="form" data-toggle="validator">
+            <div class="list_service_table">
+                <table id="listTable"></table>
+            </div>
+        </form>
+        <div id="status"></div>
+        <div id="output_format_div" style="display:none; float:right;">
+            <p>Download job format
+                <select id="output_format" onchange="changeDownloadFormat();">
+
+                </select>
+            </p>
+        </div>
+        <div style="clear:both;"></div>
+
+        <div id="result"></div>
+        <div id="url"></div>
+
+        <div id="map" style="display: none"></div>
+
+        <div id="tableWrapper">
+            <table id="resultTable"></table>
+        </div>
+        <div id="message" style="display: none">
+            <p>Copied to clipboard</p>
+        </div>
+
+        <div id="legend" style="display: none"></div>
+
+    </div>
+</section>
+
+<!-- Modal -->
+<div class="modal" tabindex="-1" role="dialog" id="treatmentModal" style="z-index: 999999;">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content" style="z-index: 9999999;">
+            <div class="modal-header">
+                <h5 class="modal-title">Plot details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="alert alert-success" id="success-alert" style="display: none;">
+    <button type="button" class="close" data-dismiss="alert">x</button>
+    <strong>Success! </strong> Added one set.
+</div>
+<style>
+    .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+        border: 1px solid #2c3e50 ! important;
+        background: #2c3e50 ! important;
+</style>
+
+
+<section>
+
+	<div class="container">
+	<h2 id="title">{{ service_json|get_item:"so:name" }}</h2>
+	<p id="description">{{ service_json|get_item:"so:description" }}</p>	
+
+	
+	{% if service_json|get_item:"operation" %}	
+		{% if service_json|get_item:"operation"|get_item:"so:url" %}	
+			<p id="moreinfo">For more information and help, go to the <a href="{{ service_json|get_item:"operation"|get_item:"so:url" }}">user documentation</a></p>	
+		{% endif %}	
+
+		{% if service_json|get_item:"operation"|get_item:"parameter_set" %}	
+			{% if service_json|get_item:"operation"|get_item:"parameter_set"|get_item:"parameters" %}	
+											
+				<form>					
+					
+					<fieldset>
+						{% for parameter in ungrouped_params %}
+							{% with grassroots_type=parameter|get_item:"grassroots_type" display_name=parameter|get_item:"so:name" param_name=parameter|get_item:"param_name" level=parameter|get_item:"level" description=parameter|get_item:"so:description" required=parameter|get_item:"required" group=parameter|get_item:"group" %}
+
+							
+								{% if grassroots_type == "xsd:boolean" %}
+									<div class="form-check {{  level }} ">
+										<label class="form-check-label"  title="{{ description }}">
+											<input type="checkbox" name="{{ param_name }}^{{ grassroots_type }}^{{ type }}^{{ group }}" value="true">
+											{{ display_name}} 
+										</label>
+									</div>
+								{% elif grassroots_type == "xsd:string" or grassroots_type == "params:keyword" or grassroots_type == "params:character" %}
+									<div class="form-group {{  level }} ">
+										<label title="{{ description }}">{{ display_name }} {% if required %}*{% endif %}</label>
+										<input type="text" class="form-control {% if required %}required{% endif %}"  name="{{ param_name}}^{{ grassroots_type }}^{{ type }}^{{ group }}" {% if required %}required{% endif %} />
+									</div>
+								{% endif %}
+								
+							{% endwith %}
+							
+						{% endfor %} 					
+					</fieldset>
+
+					
+					{% for group_name in grouped_params %}
+						{% with group=grouped_params|get_item:group_name %}							
+							<fieldset>
+								<legend>{{ group_name }}</legend>
+									{% for parameter in group|get_item:"params" %}
+										{% with grassroots_type=parameter|get_item:"grassroots_type" display_name=parameter|get_item:"so:name" param_name=parameter|get_item:"param_name" level=parameter|get_item:"level" description=parameter|get_item:"so:description" required=parameter|get_item:"required" group=parameter|get_item:"group" %}
+
+										
+											{% if grassroots_type == "xsd:boolean" %}
+												<div class="form-check {{  level }} ">
+													<label class="form-check-label"  title="{{ description }}">
+														<input type="checkbox" name="{{ param_name }}^{{ grassroots_type }}^{{ type }}^{{ group }}" value="true">
+														{{ display_name}} 
+													</label>
+												</div>
+											{% elif grassroots_type == "xsd:string" or grassroots_type == "params:keyword" or grassroots_type == "params:character" %}
+												<div class="form-group {{  level }} ">
+													<label title="{{ description }}">{{ display_name }} {% if required %}*{% endif %}</label>
+													<input type="text" class="form-control {% if required %}required{% endif %}"  name="{{ param_name}}^{{ grassroots_type }}^{{ type }}^{{ group }}" {% if required %}required{% endif %} />
+												</div>
+											{% endif %}
+											
+										{% endwith %}
+										
+									{% endfor %} 
+								
+							</fieldset>
+						{% endwith %}							
+					{%endfor %}
+					
+					
+				</form>
+				
+				{% else %}
+				 No parameters
+			{% endif %}
+
+		{% else %}
+		 No parameter set
+		{% endif %}
+		
+	{% endif %}
+	
+	
+
+	
+		Provider: {{ service_json|get_item:"provider"|get_item:"so:name" }}
+		
+	</div> <!-- class="container" -->
+		
+</section>	
+
+
+
+{% include "footer.html" %}

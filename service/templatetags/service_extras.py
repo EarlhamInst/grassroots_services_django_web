@@ -37,5 +37,8 @@ def get_logged_in_user_name (dictionary):
         name = dictionary.get (key)
 
     return name
-
-
+ 
+@register.filter
+def get_type(data):
+	return type(data).__name__
+	

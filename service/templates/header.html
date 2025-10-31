@@ -101,11 +101,18 @@ gtag('consent', 'default', {
     <!--<link href="../static/scripts/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>-->
 
     <!-- wis -->
+		<!--
     <script type="text/javascript" src="{% static 'scripts/gi_dynamic_web.js' %}?timestamp={% now "U" %}"></script>
     <script type="text/javascript" src="{% static 'scripts/fieldtrial_map.js' %}?timestamp={% now "U" %}"></script>
     <script type="text/javascript" src="{% static 'scripts/config.js' %}?timestamp={% now "U" %}"></script>
     <script type="text/javascript" src="{% static 'scripts/wis.js' %}?timestamp={% now "U" %}"></script>
-
+		-->
+		
+		<!-- header.html -->
+		<script type="text/javascript" src="{% static 'scripts/gi_dynamic_web.js' %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/fieldtrial_map.js' %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/config.js' %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/wis.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'scripts/FileSaver.min.js' %}"></script>
 

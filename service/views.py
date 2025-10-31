@@ -5,10 +5,12 @@ import logging
 # Create your views here.
 
 from django.http import HttpResponse
+from django.http import QueryDict
 from .grassroots_requests import get_all_services
 from .grassroots_requests import get_service
 from .grassroots_requests import search_treatment_return_ols
 from .grassroots_requests import interact_backend
+from .grassroots_requests import call_grassroots_server
 
 '''
 index page
@@ -253,24 +255,128 @@ def queen_index_ajax(request):
 Get one named service
 '''
 def single_service(request, service_alt_name):
+    print ("single_service")
     return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': ''})
+
+
+'''
+Get one named service
+'''
+def single_service_new(request, service_alt_name):
+	print ("single_service_new")
+	service_json = get_service (request, service_alt_name, "public");
+    
+	if service_json != None:
+		if service_json ["services"][0]:
+			service_json = service_json ["services"][0]
+
+    
+#	print ("*** BEGIN SERVICE JSON")
+#	print (service_json)
+#	print ("*** END SERVICE JSON")
+		
+		
+	# Get all of the parameters into their groups	
+	grouped_params = {}
+	ungrouped_params = []
+		
+	print ("*************************** TYPE grouped_params " +  type (grouped_params).__name__)
+		
+	for param in service_json ["operation"]["parameter_set"]["parameters"]:
+		group_name = param.get ("group")
+		
+		if group_name != None:
+			group = grouped_params.get (group_name)
+					
+			if group == None:
+				# iterate through the groups
+				for g in service_json ["operation"]["parameter_set"]["groups"]:
+					g_name = g.get ("so:name")
+					
+					if g_name != None:
+						if g_name == group_name:
+							group = {}
+							
+							group ["level"] = g ["level"]
+							group ["visible"] = g ["visible"]
+							group ["so:name"] = g ["so:name"]
+							group ["params"] = []
+
+							grouped_params [group_name] = group
+							
+							print ("adding new group (" + group_name + ") " + type (group).__name__)
+							print (group)
+
+							print ("grouped_params [" + group_name + "]: " + type (grouped_params [group_name]).__name__)
+							print (grouped_params [group_name])
+
+
+
+							print ("******* BEGIN grouped_params 1 " +  type (grouped_params).__name__)
+							#print (grouped_params)
+
+							for i in grouped_params:
+								print ("*********** " + i + ": " + type (i).__name__)
+								print ("grouped_params [i]")
+								print ("***********------ " + type (grouped_params [i]).__name__)
+
+							print ("******* END grouped_params 1")
+							break
+					
+
+			if group != None:
+				group ["params"].append (param)
+				
+				#print ("=====> Added " + param.get ("so:name") + " to Group " + group_name + " num params is now " + str (len (group ["params"])))
+				#print ("BEGIN group: ")
+				#print (group)
+				#print ("END group: ")
+			
+				print ("*************************** TYPE2 grouped_params [" + group ["so:name"] + "] " + type (grouped_params [group ["so:name"]]).__name__)
+
+			else:
+				print ("Unknown Group: " + group_name)
+			
+		else:
+			ungrouped_params.append (param)
+			print ("=====> Added " + param.get ("so:name") + " to ungrouped_params, num params is now " + str (len (ungrouped_params)))
+				
+
+#	print ("******* BEGIN grouped_params ")
+#	print (grouped_params)
+#	print ("******* END grouped_params ")
+				
+	print ("******* BEGIN grouped_params again " +  type (grouped_params).__name__)
+	for g in grouped_params:
+		print ("*********** " + g + type (g).__name__)
+	print ("******* END grouped_params again")
+
+#	print ("******* BEGIN ungrouped_params " +  type (grouped_params).__name__)
+#	print (ungrouped_params)
+	
+#	print ("******* END ungrouped_params")
+	return render(request, 'service2.html', {'service_alt_name': service_alt_name, 'service_json': service_json, 'grouped_params': grouped_params, 'ungrouped_params':ungrouped_params})
+
 
 '''
 Get one named private service
 '''
 def private_single_service(request, service_alt_name):
+    print ("private_single_service")
     return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': 'private/'})
 
 '''
 Get one named queen service
 '''
 def queen_single_service(request, service_alt_name):
+    print ("queen_single_service")
     return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': 'queen/'})
 
 '''
 Get one named service with payload
 '''
 def single_service_with_payload(request, payload):
+    print ("single_service_with_payload")
     return render(request, 'service_payload.html', {'payload': payload})
 
 '''
@@ -283,8 +389,13 @@ def single_service_search_q(request, search_q):
 Get one public grassroots service with a service name
 '''
 def single_service_ajax(request):
+    print ("single_service_ajax");
     service_name = request.POST['service_name']
     service_json = get_service (request, service_name, 'public')
+    
+    print ("****** single_service_ajax returning: ")
+    print (service_json)
+    
     return HttpResponse(service_json)
 
 '''
@@ -309,15 +420,60 @@ Post request from front-end to the public backend
 '''
 def interact_with_apache(request):
     data = request.body
-    response_json = interact_backend(data, 'public')
-    return HttpResponse(response_json)
+    response_json = interact_backend(request, data, 'public')
 
+#    body_unicode = data.decode ('utf-8')
+#    print (">>>> body_unicode: ")
+#    print (body_unicode)    
+#    
+#    request_json = json.loads (body_unicode)
+#    print (">>>> request.json: ")
+#    print (request_json)
+#    
+#    response_json = call_grassroots_server (request, request_json, 'public')
+
+    print (">>>> response_json: ")
+    print (response_json)
+
+    return HttpResponse(response_json)
+    
+
+def private_interact_with_apache(request):
+    data = request.body
+    response_json = interact_backend(request, data, 'private')
+
+#    body_unicode = data.decode ('utf-8')
+#    print (">>>> body_unicode: ")
+#    print (body_unicode)    
+#    
+#    request_json = json.loads (body_unicode)
+#    print (">>>> request.json: ")
+#    print (request_json)
+#    
+#    response_json = call_grassroots_server (request, request_json, 'public')
+
+    print (">>>> response_json: ")
+    print (response_json)
+
+    return HttpResponse(response_json)
+    
 '''
 Post request from front-end to the private backend
 '''
-def private_interact_with_apache(request):
-    data = request.body
-    response_json = interact_backend(data, 'private')
+def private_interact_with_apache_new(request):
+    body_unicode = request.body.decode ('utf-8')
+    print (">>>> body_unicode: ")
+    print (body_unicode)    
+    
+    request_json = json.loads (body_unicode)
+    print (">>>> request.json: ")
+    print (request_json)
+    
+    response_json = call_grassroots_server (request, request_json, 'private')
+
+    print (">>>> response_json: ")
+    print (response_json)
+
     return HttpResponse(response_json)
 
 '''
@@ -325,7 +481,7 @@ Post request from front-end to the queen backend
 '''
 def queen_interact_with_apache(request):
     data = request.body
-    response_json = interact_backend(data, 'queen')
+    response_json = interact_backend(request, data, 'queen')
     return HttpResponse(response_json)
 
 

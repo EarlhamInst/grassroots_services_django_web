@@ -91,11 +91,21 @@ localStorage.setItem("__acceptrics_conf", JSON.stringify({"gcmAdvanced":"true","
     <!-- ********************************************************-->
     <!-- ********************************************************-->
     <!-- wis -->
-    <script type="text/javascript" src="{% static 'scripts/gi_dynamic_web.js' %}?timestamp={% now "U" %}"></script>
+		<!--
+		<script type="text/javascript" src="{% static 'scripts/gi_dynamic_web.js' %}?timestamp={% now "U" %}"></script>
     <script type="text/javascript" src="{% static 'scripts/fieldtrial_map.js' %}?timestamp={% now "U" %}"></script>
-    <script type="text/javascript" src="{% static 'scripts/config.js' %}?timestamp={% now "U" %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/config.js' %}?timestamp={% now "U" %}"></script>
     <script type="text/javascript" src="{% static 'scripts/wis.js' %}?timestamp={% now "U" %}"></script>
-    <!-- ********************************************************-->
+		-->
+		
+		<!-- base.html -->
+		<script type="text/javascript" src="{% static 'scripts/gi_dynamic_web.js' %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/fieldtrial_map.js' %}"></script>
+		<script type="text/javascript" src="{% static 'scripts/config.js' %"></script>
+		<script type="text/javascript" src="{% static 'scripts/wis.js' %} %}"></script>
+
+		
+		<!-- ********************************************************-->
     <!-- ********************************************************-->
 
     <!-- Core theme CSS freelancer (includes Bootstrap)-->
