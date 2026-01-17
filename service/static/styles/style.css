@@ -396,3 +396,22 @@ table.plots td {
 	display: none;
 }
 
+
+
+
+fieldset {
+    margin-top: 1.0em;
+    margin-bottom: 1.0em;
+    border: 3px groove #18bc9c;
+    border-radius: 10px;
+    padding: 15px;
+    
+}
+
+fieldset legend {
+    background: #18bc9c;
+    color: #fff;
+    width: auto;
+    padding: 0.25em 0.5em;
+    border-radius: 10px;
+}

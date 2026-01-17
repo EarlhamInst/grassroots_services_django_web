@@ -426,7 +426,7 @@ function populateService(service_altname) {
 							console.log ("complete: textStatus " + textStatus);
 						}, 
 						error: function ( jqXHR, textStatus, errorThrown ) {
-							console.log ("complete: textStatus " + textStatus + " errorThrown: " + errorThrown);							
+							console.log ("error: textStatus " + textStatus + " errorThrown: " + errorThrown + " jqXHR: " + jqXHR);							
 						}
 						
         });

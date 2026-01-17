@@ -148,13 +148,16 @@
 
 
 {% block additional_scripts %}
+<!--
 <script type="text/javascript">
     var jsonData = {{ data|safe }} ;
     var typeData = '{{ type|safe }}';
     console.log("TEST", jsonData);
     console.log("type", typeData);
     console.log("test2");
+
 </script>
+-->
 
 <script type="text/javascript">
     var csrftoken = $('input[name$="csrfmiddlewaretoken"]').val();

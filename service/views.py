@@ -362,8 +362,9 @@ def single_service_new(request, service_alt_name):
 Get one named private service
 '''
 def private_single_service(request, service_alt_name):
-    print ("private_single_service")
-    return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': 'private/'})
+    template_html = "service.html"	
+    print ("private_single_service: " + template_html + " > " + service_alt_name)
+    return render(request, template_html, {'service_alt_name': service_alt_name, 'private': 'private/'})
 
 '''
 Get one named queen service
@@ -432,8 +433,8 @@ def interact_with_apache(request):
 #    
 #    response_json = call_grassroots_server (request, request_json, 'public')
 
-    print (">>>> response_json: ")
-    print (response_json)
+#    print (">>>> response_json: ")
+#    print (response_json)
 
     return HttpResponse(response_json)
     

@@ -14,9 +14,9 @@ def get_all_services (request, path):
     req_json = {"operations": {"operation": "get_all_services"}}
     result = call_grassroots_server_with_json (request, req_json, path)
 
-    print (">>>>:BEGIN get_all_services ")
+    print (">>>>:BEGIN get_all_services at " + path)
     print (result)
-    print (">>>>:END get_all_services ")
+    print (">>>>:END get_all_services  " + path)
 
     return result
 

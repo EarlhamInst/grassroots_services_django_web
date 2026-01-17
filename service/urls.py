@@ -40,5 +40,5 @@ urlpatterns = [
     path('search/<search_q>', views.single_service_search_q),
 
     # service name e.g. /service/blast-blastn
-    re_path(r'(?P<service_alt_name>[A-z0-9-\w%]+)$', views.single_service_new),
+    re_path(r'(?P<service_alt_name>[A-z0-9-\w%]+)$', views.single_service),
 ]
