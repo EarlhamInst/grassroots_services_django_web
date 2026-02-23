@@ -1,6 +1,9 @@
 from django.template.defaulttags import register
 
+from django import template
 from django.conf import settings
+
+register = template.Library()
 
 
 @register.filter
@@ -37,5 +40,12 @@ def get_logged_in_user_name (dictionary):
         name = dictionary.get (key)
 
     return name
+
+
+
+
+@register.simple_tag
+def settings_value(name):
+    return getattr (settings, name, None)
 
 
