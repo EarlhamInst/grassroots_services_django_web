@@ -40,14 +40,21 @@ def queen_index (request):
 
 
 def real_index (request, path):
-
   services = []
+  user = None
   service_list_json = get_all_services (request, path)
 	
 
   if service_list_json != None:
     services_json = service_list_json ["services"]  
     
+	user = service_list_json ["user"]
+	if user != None:
+		# Django doesn't like keys containing colons so add the non-colon versions of the values
+		if user ["so:email"] != None:
+			user ["email"] = user ["so:email"]
+
+
 
     for service_json in services_json:
       service = {};
@@ -91,13 +98,6 @@ def real_index (request, path):
       AddProviderLinks (service_json, service)
 
       services.append (service)        
-
-
-	user = service_list_json ["user"]
-	if user != None:
-		# Django doesn't like keys containing colons so add the non-colon versions of the values
-		if user ["so:email"] != None:
-			user ["email"] = user ["so:email"]
 
   return render(request, 'index.html', {'private': '', 'services': services, 'user': user})
 
