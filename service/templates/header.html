@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     {% load static %}
-    <meta charset="utf-8"/>
+
+		{% load service_extras %}
+		
+		    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta name="description" content=""/>
     <meta name="author" content=""/>
@@ -221,16 +224,27 @@ $(document).ready(function(){
 </script>
 -->
 
-<!--
-request.META
 
-<ul>
-{% for k_meta, v_meta in request.META.items %}
-<li><strong>{{ k_meta }}</strong>: {{ v_meta }}</li>
-{% endfor %}
-</ul>
--->
 
 <section id="user_details">
 				<strong> Logged in as {{ request.META|get_logged_in_user_name }}: {{ request.META|get_logged_in_user_email }} </strong>
 </section>
+
+
+
+{% settings_value "REQUEST_DEBUG" as settings_req_debug %}
+
+
+{% if settings_req_debug == True %}
+
+request.META
+
+<ul>
+{% for k_meta, v_meta in request.META.items %}
+
+<li>{{ k_meta }}: {{ v_meta }} </li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
