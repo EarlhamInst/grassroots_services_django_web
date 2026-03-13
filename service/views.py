@@ -92,7 +92,7 @@ def real_index (request, path):
 
       services.append (service)        
 
-  return render(request, 'index.html', {'private': '', 'services': services, 'user': services_list_json ["user"]})
+  return render(request, 'index.html', {'private': '', 'services': services, 'user': service_list_json ["user"]})
 
 
 
