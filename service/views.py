@@ -48,13 +48,11 @@ def real_index (request, path):
   if service_list_json != None:
     services_json = service_list_json ["services"]  
     
-	user = service_list_json ["user"]
-	if user != None:
-		# Django doesn't like keys containing colons so add the non-colon versions of the values
-		if user ["so:email"] != None:
-			user ["email"] = user ["so:email"]
-
-
+    user = service_list_json ["user"]
+    if user != None:
+      # Django doesn't like keys containing colons so add the non-colon versions of the values
+      if user ["so:email"] != None:
+        user ["email"] = user ["so:email"]
 
     for service_json in services_json:
       service = {};
