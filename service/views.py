@@ -92,7 +92,14 @@ def real_index (request, path):
 
       services.append (service)        
 
-  return render(request, 'index.html', {'private': '', 'services': services, 'user': service_list_json ["user"]})
+
+	user = service_list_json ["user"]
+	if user != None:
+		# Django doesn't like keys containing colons so add the non-colon versions of the values
+		if user ["so:email"] != None:
+			user ["email"] = user ["so:email"]
+
+  return render(request, 'index.html', {'private': '', 'services': services, 'user': user})
 
 
 
