@@ -12,19 +12,17 @@ from django.conf import settings
 BASE_PATH = settings.MEDIA_ROOT
 
 def set_apache_grassroots_ownership(path):
-    apache_user = null		
-    grassroots_group = null;
+    sudo_user = os.environ.get(settings.USER)
 
-    try: 
-        apache_user = pwd.getpwnam(settings.USER)
-        grp.getgrnam(settings.GROUP)
-    except Exception as e:
-        print ("error getting user ".e)
+    if sudo_user:
+        user = pwd.getpwnam(sudo_user)
+    else:
+        user = pwd.getpwuid(os.getuid())
 
-    if apache_user != null and grassroots_user != null:
-        apache_uid = apache_user.pw_uid
-        grassroots_gid = grassroots_group.gr_gid
-        os.chown(path, apache_uid, grassroots_gid)
+    os.chown(path, user.pw_uid, user.pw_gid)
+
+    #print(f"Ownership changed to {user.pw_name}") 
+
 
 class PhotoSerializer(serializers.Serializer):
     image = serializers.ImageField(use_url=True)

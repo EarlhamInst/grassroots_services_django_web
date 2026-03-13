@@ -18,9 +18,11 @@ BASE_PATH = settings.MEDIA_ROOT
 
 def set_apache_grassroots_ownership(path):
     sudo_user = os.environ.get(settings.USER)
+
     if sudo_user:
-       return pwd.getpwnam(sudo_user)
-    return pwd.getpwuid(os.getuid())
+        user = pwd.getpwnam(sudo_user)
+    else:
+        user = pwd.getpwuid(os.getuid())
 
     os.chown(path, user.pw_uid, user.pw_gid)
 
