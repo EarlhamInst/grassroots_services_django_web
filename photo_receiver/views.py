@@ -17,10 +17,12 @@ BASE_PATH = settings.MEDIA_ROOT
 #BASE_PATH = '/home/daniel/Applications/apache/htdocs/TEST/' # local path
 
 def set_apache_grassroots_ownership(path):
-    sudo_user = os.environ.get(settings.USER)
+    sudo_user = os.environ.get("SUDO_USER")
+
     if sudo_user:
-       return pwd.getpwnam(sudo_user)
-    return pwd.getpwuid(os.getuid())
+        user = pwd.getpwnam(sudo_user)
+    else:
+        user = pwd.getpwuid(os.getuid())
 
     os.chown(path, user.pw_uid, user.pw_gid)
 
