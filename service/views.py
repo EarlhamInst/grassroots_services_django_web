@@ -43,11 +43,11 @@ def real_index (request, path):
 
   services = []
   service_list_json = get_all_services (request, path)
-
+	
 
   if service_list_json != None:
     services_json = service_list_json ["services"]  
-        
+    
 
     for service_json in services_json:
       service = {};
@@ -92,7 +92,7 @@ def real_index (request, path):
 
       services.append (service)        
 
-  return render(request, 'index.html', {'private': '', 'services': services})
+  return render(request, 'index.html', {'private': '', 'services': services, 'user': services_list_json ["user"]})
 
 
 

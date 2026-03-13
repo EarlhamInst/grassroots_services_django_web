@@ -74,8 +74,11 @@ gtag('consent', 'default', {
 
     <!--NEW  Datatables -->
     <link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/datatables/datatables.min.css' %}" type="text/css"/>
-    <script type="text/javascript" src="{% static 'fieldtrial/SCRIPTS/datatables/datatables.min.js' %}"></script>
 
+		<!--
+		<script type="text/javascript" src="{% static 'fieldtrial/SCRIPTS/datatables/datatables.min.js' %}"></script>
+		-->
+		<script type="text/javascript" src="{% static 'fieldtrial/SCRIPTS/datatables/datatables.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'scripts/jquery/datatables/js/dataTables.buttons.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'scripts/jquery/jszip.min.js' %}"></script>
@@ -229,7 +232,13 @@ $(document).ready(function(){
 
 
 <section id="user_details">
-				<strong> Logged in as {{ request.META|get_logged_in_user_name }}: {{ request.META|get_logged_in_user_email }} </strong>
+		<!--		<strong> Logged in as {{ request.META|get_logged_in_user_email }} </strong> -->
+		
+		{% if user %}
+		<strong> Logged in as {% user ["so:email" %} </strong> 
+		{% else %}
+		<strong> Not logged in</strong> 		
+		{% endif %}
 </section>
 
 
