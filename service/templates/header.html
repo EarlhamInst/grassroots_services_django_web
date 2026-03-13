@@ -224,10 +224,11 @@ $(document).ready(function(){
 <!--
 request.META
 
+<ul>
 {% for k_meta, v_meta in request.META.items %}
-{{ k_meta }}: {{ v_meta }}
+<li><strong>{{ k_meta }}</strong>: {{ v_meta }}</li>
 {% endfor %}
-
+</ul>
 -->
 
 <section id="user_details">

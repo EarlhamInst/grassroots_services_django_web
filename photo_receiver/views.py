@@ -17,19 +17,15 @@ BASE_PATH = settings.MEDIA_ROOT
 #BASE_PATH = '/home/daniel/Applications/apache/htdocs/TEST/' # local path
 
 def set_apache_grassroots_ownership(path):
-    apache_user = null		
-    grassroots_group = null;
+    sudo_user = os.environ.get(settings.USER)
+    if sudo_user:
+       return pwd.getpwnam(sudo_user)
+    return pwd.getpwuid(os.getuid())
 
-    try: 
-        apache_user = pwd.getpwnam(settings.USER)
-        grp.getgrnam(settings.GROUP)
-    except Exception as e:
-        print ("error getting user ", e)
+    os.chown(path, user.pw_uid, user.pw_gid)
 
-    if apache_user != null and grassroots_user != null:
-        apache_uid = apache_user.pw_uid
-        grassroots_gid = grassroots_group.gr_gid
-        os.chown(path, apache_uid, grassroots_gid)
+    #print(f"Ownership changed to {user.pw_name}")
+
 
 class LatestPhoto(APIView):
     def get(self, request, subfolder, plot_number):        
@@ -79,6 +75,7 @@ class PhotoRetrieveView(APIView):
             # Photo not found
             raise Http404("Photo not found")
 
+
 class LimitsFileRetrieve(APIView):
     def get(self, request, subfolder):
         # Construct the path to the limits.json file
@@ -100,7 +97,7 @@ class LimitsFileRetrieve(APIView):
         else:
             # File not found
             raise Http404("limits.json not found")
-        
+
 class LimitsFileUpdate(APIView):
     def post(self, request, subfolder):
         subfolder_path = os.path.join(BASE_PATH, subfolder)
@@ -129,10 +126,10 @@ class LimitsFileUpdate(APIView):
 
                 # Update the specific trait's limits
                 if trait_key in limits:
-                    limits[trait_key]['min'] = min_value
-                    limits[trait_key]['max'] = max_value
+                   limits[trait_key]['min'] = min_value
+                   limits[trait_key]['max'] = max_value
                 else:
-                    limits[trait_key] = {'min': min_value, 'max': max_value}
+                   limits[trait_key] = {'min': min_value, 'max': max_value}
 
             # Write the updated or new limits to the file
             with open(limits_file_path, 'w') as file:
@@ -148,7 +145,7 @@ class AllowedStudiesView(APIView):
         try:
             # Path to the Studies_for_app.txt file
             studies_file_path = os.path.join(settings.BASE_DIR, 'Studies_for_app.txt')
-            
+
             # Check if the file exists
             if not os.path.exists(studies_file_path):
                 return JsonResponse({'error': 'Studies_for_app.txt not found'}, status=404)
@@ -183,3 +180,4 @@ class OnlineCheckView(APIView):
             response['mongo'] = f'error: {str(e)}'
 
         return JsonResponse(response)
+
