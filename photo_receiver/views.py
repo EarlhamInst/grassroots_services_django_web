@@ -17,16 +17,19 @@ BASE_PATH = settings.MEDIA_ROOT
 #BASE_PATH = '/home/daniel/Applications/apache/htdocs/TEST/' # local path
 
 def set_apache_grassroots_ownership(path):
-    sudo_user = os.environ.get("SUDO_USER")
+    apache_user = null          
+    grassroots_group = null;
 
-    if sudo_user:
-        user = pwd.getpwnam(sudo_user)
-    else:
-        user = pwd.getpwuid(os.getuid())
+    try: 
+        apache_user = pwd.getpwnam(settings.USER)
+        grp.getgrnam(settings.GROUP)
+    except Exception as e:
+        print ("error getting user ", e)
 
-    os.chown(path, user.pw_uid, user.pw_gid)
-
-    #print(f"Ownership changed to {user.pw_name}")
+    if apache_user != null and grassroots_user != null:
+        apache_uid = apache_user.pw_uid
+        grassroots_gid = grassroots_group.gr_gid
+        os.chown(path, apache_uid, grassroots_gid)
 
 
 class LatestPhoto(APIView):
