@@ -44,7 +44,7 @@ def call_grassroots_server (request, req_json, path):
         try: 
           res = requests.post (url, data = json.dumps (req_json), headers = request.headers)
           result = res.json ()
-|       except Exception as e:
+        except Exception as e:
           response_text = res.text;
           print (">>>> Error calling  url: " + url)
           print (">>>> Received: " + response_text)
