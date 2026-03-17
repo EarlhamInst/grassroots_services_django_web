@@ -90,13 +90,13 @@ class LimitsFileRetrieve(APIView):
         # Check if the subfolder exists, if not create it
         if not os.path.exists(subfolder_path):
             os.makedirs(subfolder_path)
-            #set_apache_grassroots_ownership(subfolder_path)
+            set_apache_grassroots_ownership(subfolder_path)
 
         limits_file_path = os.path.join(BASE_PATH, subfolder, 'limits.json')
 
         # Check if the limits.json file exists
         if os.path.exists(limits_file_path):
-            #set_apache_grassroots_ownership(limits_file_path)
+            set_apache_grassroots_ownership(limits_file_path)
             # Serve the limits.json file
             return FileResponse(open(limits_file_path, 'rb'), content_type='application/json')
         else:
@@ -111,7 +111,7 @@ class LimitsFileUpdate(APIView):
         if not os.path.exists(subfolder_path):
             os.makedirs(subfolder_path)
             # Set ownership of the new directory
-            #set_apache_grassroots_ownership(subfolder_path)
+            set_apache_grassroots_ownership(subfolder_path)
 
         limits_file_path = os.path.join(subfolder_path, 'limits.json')
 
@@ -139,7 +139,7 @@ class LimitsFileUpdate(APIView):
             # Write the updated or new limits to the file
             with open(limits_file_path, 'w') as file:
                 json.dump(limits, file, indent=4)
-                #set_apache_grassroots_ownership(limits_file_path)
+                set_apache_grassroots_ownership(limits_file_path)
 
             return JsonResponse({'message': f'Limits for {trait_key} updated successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
