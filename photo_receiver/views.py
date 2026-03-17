@@ -17,16 +17,19 @@ BASE_PATH = settings.MEDIA_ROOT
 #BASE_PATH = '/home/daniel/Applications/apache/htdocs/TEST/' # local path
 
 def set_apache_grassroots_ownership(path):
-    sudo_user = os.environ.get(settings.USER)
+    apache_user = null          
+    grassroots_group = null;
 
-    if sudo_user:
-        user = pwd.getpwnam(sudo_user)
-    else:
-        user = pwd.getpwuid(os.getuid())
+    try: 
+        apache_user = pwd.getpwnam(settings.USER)
+        grp.getgrnam(settings.GROUP)
+    except Exception as e:
+        print ("error getting user ", e)
 
-    os.chown(path, user.pw_uid, user.pw_gid)
-
-    #print(f"Ownership changed to {user.pw_name}")
+    if apache_user != null and grassroots_user != null:
+        apache_uid = apache_user.pw_uid
+        grassroots_gid = grassroots_group.gr_gid
+        os.chown(path, apache_uid, grassroots_gid)
 
 
 class LatestPhoto(APIView):
@@ -77,6 +80,7 @@ class PhotoRetrieveView(APIView):
             # Photo not found
             raise Http404("Photo not found")
 
+
 class LimitsFileRetrieve(APIView):
     def get(self, request, subfolder):
         # Construct the path to the limits.json file
@@ -86,19 +90,19 @@ class LimitsFileRetrieve(APIView):
         # Check if the subfolder exists, if not create it
         if not os.path.exists(subfolder_path):
             os.makedirs(subfolder_path)
-            set_apache_grassroots_ownership(subfolder_path)
+            #set_apache_grassroots_ownership(subfolder_path)
 
         limits_file_path = os.path.join(BASE_PATH, subfolder, 'limits.json')
 
         # Check if the limits.json file exists
         if os.path.exists(limits_file_path):
-            set_apache_grassroots_ownership(limits_file_path)
+            #set_apache_grassroots_ownership(limits_file_path)
             # Serve the limits.json file
             return FileResponse(open(limits_file_path, 'rb'), content_type='application/json')
         else:
             # File not found
             raise Http404("limits.json not found")
-        
+
 class LimitsFileUpdate(APIView):
     def post(self, request, subfolder):
         subfolder_path = os.path.join(BASE_PATH, subfolder)
@@ -107,7 +111,7 @@ class LimitsFileUpdate(APIView):
         if not os.path.exists(subfolder_path):
             os.makedirs(subfolder_path)
             # Set ownership of the new directory
-            set_apache_grassroots_ownership(subfolder_path)
+            #set_apache_grassroots_ownership(subfolder_path)
 
         limits_file_path = os.path.join(subfolder_path, 'limits.json')
 
@@ -127,15 +131,15 @@ class LimitsFileUpdate(APIView):
 
                 # Update the specific trait's limits
                 if trait_key in limits:
-                    limits[trait_key]['min'] = min_value
-                    limits[trait_key]['max'] = max_value
+                   limits[trait_key]['min'] = min_value
+                   limits[trait_key]['max'] = max_value
                 else:
-                    limits[trait_key] = {'min': min_value, 'max': max_value}
+                   limits[trait_key] = {'min': min_value, 'max': max_value}
 
             # Write the updated or new limits to the file
             with open(limits_file_path, 'w') as file:
                 json.dump(limits, file, indent=4)
-                set_apache_grassroots_ownership(limits_file_path)
+                #set_apache_grassroots_ownership(limits_file_path)
 
             return JsonResponse({'message': f'Limits for {trait_key} updated successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -146,7 +150,7 @@ class AllowedStudiesView(APIView):
         try:
             # Path to the Studies_for_app.txt file
             studies_file_path = os.path.join(settings.BASE_DIR, 'Studies_for_app.txt')
-            
+
             # Check if the file exists
             if not os.path.exists(studies_file_path):
                 return JsonResponse({'error': 'Studies_for_app.txt not found'}, status=404)
@@ -181,3 +185,4 @@ class OnlineCheckView(APIView):
             response['mongo'] = f'error: {str(e)}'
 
         return JsonResponse(response)
+
