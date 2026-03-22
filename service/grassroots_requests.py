@@ -31,6 +31,7 @@ def get_service(service_alt_name, str):
 def call_grassroots_server (request, req_json, path):
     result = None
     url = None
+    res = None
 
     if path == 'public':
         url = server_url
@@ -41,14 +42,17 @@ def call_grassroots_server (request, req_json, path):
 
     if url is not None:
         print (">>>> calling url " + url)
+        req_data = json.dumps (req_json)
+
         try: 
-          res = requests.post (url, data = json.dumps (req_json), headers = request.headers)
+          res = requests.post (url, data = req_data, headers = request.headers)
+          response_text = res.text;
+          print (">>>> Received: " + response_text)
           result = res.json ()
         except Exception as e:
-          response_text = res.text;
-          print (">>>> Error calling  url: " + url)
-          print (">>>> Received: " + response_text)
-         
+            print (">>>> Error calling  url: " + url + " data: " + req_data + " headers: ")
+            print (request.headers)
+            print (e)       
       			
     else:
         print (">>>> no url for " + path)
