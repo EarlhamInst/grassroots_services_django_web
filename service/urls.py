@@ -28,6 +28,7 @@ urlpatterns = [
     path('queen/ajax/interact_backend/', views.queen_interact_with_apache),
     re_path(r'queen/(?P<service_alt_name>[A-z0-9-\w%]+)$', views.queen_single_service),
 
+    path('orcid/login', views.orcid_login),
 
     # for copo ontology lookup services
     path('api/co_ols', views.crop_ontology_search),

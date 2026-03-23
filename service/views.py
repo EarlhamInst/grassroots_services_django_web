@@ -28,6 +28,16 @@ ontologies = {
 };
 
 
+def orcid_login(request):
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+
+    flutter_redirect = f"com.grassroots.auth://login?code={code}&state={state}"
+
+    response = HttpResponse(status=302)  # 302 redirect
+    response['Location'] = flutter_redirect
+    return response
+
 def index (request):
   return real_index (request, "public")
 
