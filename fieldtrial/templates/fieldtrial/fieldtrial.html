@@ -180,16 +180,26 @@
     var map;
     var markersGroup2;
     var locateIntervalId;
-    var location_layer_marker = new L.MarkerClusterGroup({});
-    var location_layer_circle = new L.MarkerClusterGroup({});
+    var location_layer_marker = null;
+    var location_layer_circle = null;
     var loadingImage = '<img src="{% static "images/ajax-loader.gif" %}" alt="Loading"/>';
 
     $(function () {
         $('#plots').html(loadingImage);
-        $('#result').empty();
-        start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
         initialiseHarvestYearSlider();
+        runWhenBrowserIdle(function () {
+            start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
+            $('#result').empty();
+        });
     });
+
+    function runWhenBrowserIdle(callback) {
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(callback, {timeout: 750});
+        } else {
+            window.setTimeout(callback, 0);
+        }
+    }
 
     function initialiseHarvestYearSlider() {
         var currentYear = new Date().getFullYear();
@@ -220,11 +230,13 @@
         $('#tableWrapper').html('<table id="resultTable"></table>');
 
         markersGroup2 = new L.MarkerClusterGroup({});
-        map = L.map('map', {zoomControl: false}).setView([52.621615, 10.219470], 5);
+        map = L.map('map', {zoomControl: false, preferCanvas: true}).setView([52.621615, 10.219470], 5);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             maxZoom: 25,
+            updateWhenIdle: true,
+            keepBuffer: 2,
             referrerPolicy: 'strict-origin-when-cross-origin'
         }).addTo(map);
 
@@ -238,8 +250,12 @@
     }
 
     function onLocationFound(e) {
-        map.removeLayer(location_layer_marker);
-        map.removeLayer(location_layer_circle);
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
 
         location_layer_marker = new L.MarkerClusterGroup({});
         location_layer_circle = new L.MarkerClusterGroup({});
@@ -272,8 +288,12 @@
     function stop_update_map_location() {
         clearInterval(locateIntervalId);
         $('#locationButton').html('<button type="button" class="btn btn-default" onclick="update_map_location();">My Location</button>');
-        map.removeLayer(location_layer_marker);
-        map.removeLayer(location_layer_circle);
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
     }
 </script>
 {% endblock %}

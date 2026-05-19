@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="{% static 'scripts/jquery/jqrangeslider/css/iThing.css' %}" type="text/css"/>
 
 <style type="text/css">
+    .fieldtrial-spacer {
+        height: 20px;
+    }
+
     .fieldtrial-section {
         padding: 100px 0 !important;
     }
@@ -85,7 +89,10 @@
         }
     }
 </style>
+{% endblock %}
 
+{% block content %}
+<div class="fieldtrial-spacer"></div>
 <section id="services" class="fieldtrial-section">
     <div class="container">
         <h2 id="title">Browse Field Trials</h2>
@@ -154,107 +161,131 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
+{% endblock %}
 
-        <script type="text/javascript">
-            var csrftoken = $('input[name$="csrfmiddlewaretoken"]').val();
-            var map;
-            var markersGroup2;
-            var locateIntervalId;
-            var location_layer_marker = new L.MarkerClusterGroup({});
-            var location_layer_circle = new L.MarkerClusterGroup({});
-            var loadingImage = '<img src="{% static "images/ajax-loader.gif" %}" alt="Loading"/>';
+{% block additional_scripts %}
+<script type="text/javascript">
+    var csrftoken = $('input[name$="csrfmiddlewaretoken"]').val();
+    var map;
+    var markersGroup2;
+    var locateIntervalId;
+    var location_layer_marker = null;
+    var location_layer_circle = null;
+    var loadingImage = '<img src="{% static "images/ajax-loader.gif" %}" alt="Loading"/>';
 
-            $(function () {
-                $('#plots').html(loadingImage);
-                $('#result').empty();
-                start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
-                initialiseHarvestYearSlider();
-            });
+    $(function () {
+        $('#plots').html(loadingImage);
+        initialiseHarvestYearSlider();
+        runWhenBrowserIdle(function () {
+            start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
+            $('#result').empty();
+        });
+    });
 
-            function initialiseHarvestYearSlider() {
-                var currentYear = new Date().getFullYear();
+    function runWhenBrowserIdle(callback) {
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(callback, {timeout: 750});
+        } else {
+            window.setTimeout(callback, 0);
+        }
+    }
 
-                jQuery('#slider').rangeSlider({
-                    bounds: {
-                        min: 2010,
-                        max: currentYear + 1
-                    },
-                    defaultValues: {
-                        min: 2010,
-                        max: currentYear + 1
-                    },
-                    step: 1
-                });
-            }
+    function initialiseHarvestYearSlider() {
+        var currentYear = new Date().getFullYear();
 
-            /**
-             * Start field trial map and table.
-             *
-             * @param {Object} ft_json - Data from backend containing all field trial info.
-             * @param {string} type_param - Grassroots:FieldTrial, Grassroots:Study, or AllFieldTrials.
-             */
-            function start_map(ft_json, type_param) {
-                $('#simpleAdvanceWrapper').hide();
-                $('#status').empty();
-                $('#form').empty();
-                $('#tableWrapper').html('<table id="resultTable"></table>');
+        jQuery('#slider').rangeSlider({
+            bounds: {
+                min: 2010,
+                max: currentYear + 1
+            },
+            defaultValues: {
+                min: 2010,
+                max: currentYear + 1
+            },
+            step: 1
+        });
+    }
 
-                markersGroup2 = new L.MarkerClusterGroup({});
-                map = L.map('map', {zoomControl: false}).setView([52.621615, 10.219470], 5);
+    /**
+     * Start field trial map and table.
+     *
+     * @param {Object} ft_json - Data from backend containing all field trial info.
+     * @param {string} type_param - Grassroots:FieldTrial, Grassroots:Study, or AllFieldTrials.
+     */
+    function start_map(ft_json, type_param) {
+        $('#simpleAdvanceWrapper').hide();
+        $('#status').empty();
+        $('#form').empty();
+        $('#tableWrapper').html('<table id="resultTable"></table>');
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-                    maxZoom: 25,
-                    referrerPolicy: 'strict-origin-when-cross-origin'
-                }).addTo(map);
+        markersGroup2 = new L.MarkerClusterGroup({});
+        map = L.map('map', {zoomControl: false, preferCanvas: true}).setView([52.621615, 10.219470], 5);
 
-                L.control.zoom({position: 'topright'}).addTo(map);
-                L.control.scale().addTo(map);
-                startFieldTrialGIS(ft_json['results'][0]['results'], type_param);
-                $('#map_buttons').show();
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 25,
+            updateWhenIdle: true,
+            keepBuffer: 2,
+            referrerPolicy: 'strict-origin-when-cross-origin'
+        }).addTo(map);
 
-                map.on('locationfound', onLocationFound);
-                map.on('locationerror', onLocationError);
-            }
+        L.control.zoom({position: 'topright'}).addTo(map);
+        L.control.scale().addTo(map);
+        startFieldTrialGIS(ft_json['results'][0]['results'], type_param);
+        $('#map_buttons').show();
 
-            function onLocationFound(e) {
-                map.removeLayer(location_layer_marker);
-                map.removeLayer(location_layer_circle);
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+    }
 
-                location_layer_marker = new L.MarkerClusterGroup({});
-                location_layer_circle = new L.MarkerClusterGroup({});
+    function onLocationFound(e) {
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
 
-                L.marker(e.latlng)
-                    .bindPopup('You are within ' + e.accuracy + ' meters from this point')
-                    .openPopup()
-                    .addTo(location_layer_marker);
+        location_layer_marker = new L.MarkerClusterGroup({});
+        location_layer_circle = new L.MarkerClusterGroup({});
 
-                L.circle(e.latlng, e.accuracy).addTo(location_layer_circle);
-                map.addLayer(location_layer_marker);
-                map.addLayer(location_layer_circle);
-            }
+        L.marker(e.latlng)
+            .bindPopup('You are within ' + e.accuracy + ' meters from this point')
+            .openPopup()
+            .addTo(location_layer_marker);
 
-            function onLocationError(e) {
-                console.log(e.message);
-            }
+        L.circle(e.latlng, e.accuracy).addTo(location_layer_circle);
+        map.addLayer(location_layer_marker);
+        map.addLayer(location_layer_circle);
+    }
 
-            function locate() {
-                map.locate({setView: false});
-            }
+    function onLocationError(e) {
+        console.log(e.message);
+    }
 
-            function update_map_location() {
-                map.locate({setView: true, maxZoom: 16});
-                clearInterval(locateIntervalId);
-                locateIntervalId = setInterval(locate, 1000);
-                $('#locationButton').html('<button type="button" class="btn btn-default" onclick="stop_update_map_location();">Stop Location</button>');
-            }
+    function locate() {
+        map.locate({setView: false});
+    }
 
-            function stop_update_map_location() {
-                clearInterval(locateIntervalId);
-                $('#locationButton').html('<button type="button" class="btn btn-default" onclick="update_map_location();">My Location</button>');
-                map.removeLayer(location_layer_marker);
-                map.removeLayer(location_layer_circle);
-            }
+    function update_map_location() {
+        map.locate({setView: true, maxZoom: 16});
+        clearInterval(locateIntervalId);
+        locateIntervalId = setInterval(locate, 1000);
+        $('#locationButton').html('<button type="button" class="btn btn-default" onclick="stop_update_map_location();">Stop Location</button>');
+    }
+
+    function stop_update_map_location() {
+        clearInterval(locateIntervalId);
+        $('#locationButton').html('<button type="button" class="btn btn-default" onclick="update_map_location();">My Location</button>');
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
+    }
         </script>
     </div>
 </section>
