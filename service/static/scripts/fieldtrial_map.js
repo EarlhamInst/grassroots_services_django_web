@@ -36,6 +36,8 @@ var datemax = 0;
 var currentImageIndex = 0;
 //var combinedImages = [];
 
+var fieldTrialMarkerIcon = null;
+
 //function changeImage(direction) {
 
 
@@ -290,6 +292,7 @@ function produceFieldtrialTable(data, type_param) {
     yrtable = jQuery('#resultTable').DataTable({
         data: data,
         "aaSorting": [],
+        "deferRender": true,
         "scrollX": true,
         "columns": [
             {
@@ -953,8 +956,7 @@ function displayFTLocations(array, type_param) {
         //     + '<a class=\"newstyle_link\" href=\"../dynamic/fieldtrialplots_dynamic.html?id=' + id + '\" target="_blank">View plots</a>'
         // ;
         // table with two columns same as single study detail page
-        var popup_note = create_study_info_html(array[i])
-        addFTPointer(la, lo, popup_note);
+        addFTPointer(la, lo, array[i]);
 
         // shape data with popup info
         if (type_param === 'Grassroots:Study') {
@@ -1006,83 +1008,24 @@ function displayFTLocations(array, type_param) {
  *
  * @param {string} la - latitude of the pointer.
  * @param {string} lo - longitude of the pointer.
- * @param {string} note - popup notes of the pointer.
+ * @param {Object} studyJson - Study JSON used to build popup content lazily.
  */
-function addFTPointer(la, lo, note) {
-    var blueIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-blue.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+function addFTPointer(la, lo, studyJson) {
+    if (fieldTrialMarkerIcon === null) {
+        fieldTrialMarkerIcon = new L.Icon({
+            iconUrl: 'scripts/leaflet/images/marker-icon-2x-blue.png',
+            shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+    }
 
-    var redIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-red.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+    var markerLayer = L.marker([la, lo], {icon: fieldTrialMarkerIcon}).bindPopup('', {maxHeight: 400});
+    markerLayer.on('popupopen', function (event) {
+        event.popup.setContent(create_study_info_html(studyJson));
     });
-
-    var greenIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-green.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
-    var orangeIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-orange.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
-    var yellowIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-yellow.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
-    var violetIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-violet.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
-    var greyIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-grey.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
-    var blackIcon = new L.Icon({
-        iconUrl: 'scripts/leaflet/images/marker-icon-2x-black.png',
-        shadowUrl: 'scripts/leaflet/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-    var markerLayer;
-    var popup = L.popup({maxHeight: 400}).setContent(note);
-    markerLayer = L.marker([la, lo]).bindPopup(popup).openPopup();
     markersGroup2.addLayer(markerLayer);
 
 }
@@ -2359,4 +2302,3 @@ var countDecimals = function (value) {
         return value.toString().split(".")[1].length;
     return 0;
 }
-

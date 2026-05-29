@@ -1,49 +1,83 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block all_styles_and_scripts %}
-{{ block.super }} 
-    <script type="text/javascript"
-        src="{% static 'scripts/jquery/jqrangeslider/jQAllRangeSliders-withRuler-min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'scripts/jquery/jqrangeslider/css/iThing.css' %}"
-      type="text/css"/>
+{{ block.super }}
+<script type="text/javascript" src="{% static 'scripts/jquery/jqrangeslider/jQAllRangeSliders-withRuler-min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'scripts/jquery/jqrangeslider/css/iThing.css' %}" type="text/css"/>
 
-    <!-- ********************************************************-->
-    <!-- Leaflet NEWEST VERSION -->
-    <link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet/leaflet.css' %}"/>
-    <script src="{% static 'fieldtrial/SCRIPTS/leaflet/leaflet.js' %}"></script> 
+<link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet/leaflet.css' %}"/>
+<script src="{% static 'fieldtrial/SCRIPTS/leaflet/leaflet.js' %}"></script>
 
-    <!-- Leaflet markercluster NEWEST VERSION -->
-    <link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/MarkerCluster.css' %}"/>
-    <link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/MarkerCluster.Default.css' %}"/>
-    <script src="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/leaflet.markercluster.js' %}"></script>
+<link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/MarkerCluster.css' %}"/>
+<link rel="stylesheet" href="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/MarkerCluster.Default.css' %}"/>
+<script src="{% static 'fieldtrial/SCRIPTS/leaflet.markercluster/leaflet.markercluster.js' %}"></script>
 
-
-
-    <style type="text/css">
-    .modal-dialog {
-    max-width: 70%;
+<style type="text/css">
+    .fieldtrial-spacer {
+        height: 20px;
     }
-    .modal-body {
+
+    .fieldtrial-section {
+        padding: 100px 0 !important;
+    }
+
+    .fieldtrial-output-format {
+        display: none;
+        float: right;
+    }
+
+    .fieldtrial-clear {
+        clear: both;
+    }
+
+    .fieldtrial-harvest-label {
+        float: right;
+        padding-top: 40px;
+    }
+
+    .fieldtrial-slider {
+        margin: 3px 10px 0;
+        z-index: 1000;
+    }
+
+    .fieldtrial-plot-modal {
+        z-index: 999999;
+    }
+
+    .fieldtrial-plot-modal .modal-content {
+        z-index: 9999999;
+    }
+
+    .fieldtrial-plot-modal .modal-dialog {
+        max-width: 70%;
+    }
+
+    .fieldtrial-plot-modal .modal-body {
         height: 250px;
         overflow-y: auto;
     }
 
+    #resultTable td,
+    #resultTable th {
+        text-align: center;
+    }
+
+    #map_buttons {
+        display: none;
+        position: absolute;
+    }
+
     @media (min-height: 500px) {
-        .modal-body {
+        .fieldtrial-plot-modal .modal-body {
             height: 400px;
         }
     }
 
     @media (min-height: 800px) {
-        .modal-body {
+        .fieldtrial-plot-modal .modal-body {
             height: 600px;
         }
-    }
-
-    #resultTable td, th {
-        text-align: center;
     }
 
     @media (max-width: 767px) {
@@ -53,216 +87,200 @@
         }
 
         #map_buttons {
-            position: absolute;
             top: 150px;
             border: 1px solid;
-            display: none;
         }
     }
 
     @media (min-width: 767px) {
         #map_buttons {
-            position: absolute;
             top: 200px;
-            display: none;
         }
-    }   
-    </style>
-
+    }
+</style>
 {% endblock %}
 
-
-
 {% block content %}
-<div style="height: 20px;"></div>
-<section id="services" style="padding: 100px 0px 100px 0px ! important;">
+<div class="fieldtrial-spacer"></div>
+<section id="services" class="fieldtrial-section">
     <div class="container">
         <h2 id="title">Browse Field Trials</h2>
 
         <p id="description"></p>
         <form id="form" role="form">
+            {% csrf_token %}
             <div class="list_service_table">
                 <table id="listTable"></table>
             </div>
         </form>
-        <div id="status"></div>
-        <div id="output_format_div" style="display:none; float:right;">
-            <p>Download job format
-                <select id="output_format" onchange="changeDownloadFormat();">
 
-                </select>
+        <div id="status"></div>
+        <div id="output_format_div" class="fieldtrial-output-format">
+            <p>
+                Download job format
+                <select id="output_format" onchange="changeDownloadFormat();"></select>
             </p>
         </div>
-        <div style="clear:both;"></div>
+        <div class="fieldtrial-clear"></div>
 
-        <div id="result"><img src="../../static/images/ajax-loader.gif"/></div>
+        <div id="result">
+            <img src="{% static 'images/ajax-loader.gif' %}" alt="Loading"/>
+        </div>
 
         <div id="map"></div>
         <div id="map_buttons">
             <div class="input-group">
-               <span class="input-group-btn" id="locationButton">
-                    <button type="button" class="btn btn-default" onclick="update_map_location();">My Location
+                <span class="input-group-btn" id="locationButton">
+                    <button type="button" class="btn btn-default" onclick="update_map_location();">
+                        My Location
                     </button>
-               </span>
+                </span>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-4"><p style="padding-top: 40px;float: right;">Search Harvest year: </p></div>
             <div class="col-md-4">
-                <div id="slider" style="margin-top:3px;margin-left:10px;margin-right:10px;z-index: 1000;"></div>
+                <p class="fieldtrial-harvest-label">Search Harvest year: </p>
+            </div>
+            <div class="col-md-4">
+                <div id="slider" class="fieldtrial-slider"></div>
             </div>
             <div class="col-md-4"></div>
         </div>
+
         <div id="tableWrapper">
             <table id="resultTable"></table>
         </div>
 
-        <!-- Modal -->
-        <div class="modal " tabindex="-1" role="dialog" id="plotModal" style="z-index: 999999;">
-            <div class="modal-dialog  modal-dialog-centered" role="document">
-                <div class="modal-content" style="z-index: 9999999;">
+        <div class="modal fieldtrial-plot-modal" tabindex="-1" role="dialog" id="plotModal">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body" id="modal-body">
-
-                    </div>
+                    <div class="modal-body" id="modal-body"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">
+                            Close
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        
     </div>
-</section>     
+</section>
 {% endblock %}
-
-
-
-
 
 {% block additional_scripts %}
 <script type="text/javascript">
-    var jsonData = {{ data|safe }} ;
-    var typeData = '{{ type|safe }}';
-    console.log("TEST", jsonData);
-    console.log("type", typeData);
-    console.log("test2");
-</script>
-
-<script type="text/javascript">
     var csrftoken = $('input[name$="csrfmiddlewaretoken"]').val();
-    $(document).ready(function () {
-        $('#plots').html('<img src="../../static/images/ajax-loader.gif"/>');
-        $('#result').html('');
-        start_map({{ data|safe }}, '{{ type|safe }}');
-        var current_year = new Date().getFullYear();
-        {#jQuery("#slider").dateRangeSlider({#}
-        {#    bounds: {#}
-        {#        min: new Date(2014, 0, 1),#}
-        {#        max: new Date(current_year+1,0,1)#}
-        {#    },#}
-        {#    defaultValues: {#}
-        {#        min: new Date(2014, 0, 1),#}
-        {#        max: new Date(current_year+1,0,1)#}
-        {#    }, step: {#}
-        {#        years: 1#}
-        {#    }#}
-        //{#});#}
-        jQuery("#slider").rangeSlider({
+    var map;
+    var markersGroup2;
+    var locateIntervalId;
+    var location_layer_marker = null;
+    var location_layer_circle = null;
+    var loadingImage = '<img src="{% static "images/ajax-loader.gif" %}" alt="Loading"/>';
+
+    $(function () {
+        $('#plots').html(loadingImage);
+        initialiseHarvestYearSlider();
+        runWhenBrowserIdle(function () {
+            start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
+            $('#result').empty();
+        });
+    });
+
+    function runWhenBrowserIdle(callback) {
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(callback, {timeout: 750});
+        } else {
+            window.setTimeout(callback, 0);
+        }
+    }
+
+    function initialiseHarvestYearSlider() {
+        var currentYear = new Date().getFullYear();
+
+        jQuery('#slider').rangeSlider({
             bounds: {
                 min: 2010,
-                max: current_year + 1
+                max: currentYear + 1
             },
             defaultValues: {
                 min: 2010,
-                max: current_year + 1
-            }, step: 1
+                max: currentYear + 1
+            },
+            step: 1
         });
+    }
 
-    });
-
-    var location_layer_marker = new L.MarkerClusterGroup({});
-    var location_layer_circle = new L.MarkerClusterGroup({});
-
-/**
-* Start field trial map and table
-*
-* @param {JSONArray} jsonArray - JSONArray from backend containing all field trial info.
-* @param {string} type_param - type of the display, can be Grassroots:FieldTrial, Grassroots:Study or AllFieldTrials.
-*/
+    /**
+     * Start field trial map and table.
+     *
+     * @param {Object} ft_json - Data from backend containing all field trial info.
+     * @param {string} type_param - Grassroots:FieldTrial, Grassroots:Study, or AllFieldTrials.
+     */
     function start_map(ft_json, type_param) {
         $('#simpleAdvanceWrapper').hide();
-        $('#status').html('');
-        $('#form').html('');
+        $('#status').empty();
+        $('#form').empty();
         $('#tableWrapper').html('<table id="resultTable"></table>');
-        // $('#result').html(JSON.stringify(json['results'][0]['results'][0]['data']));
-        // all the markers in the map
+
         markersGroup2 = new L.MarkerClusterGroup({});
-        // markersGroup_current_location = new L.MarkerClusterGroup({});
-        // L is the leaflet library object
-        map = L.map('map', {zoomControl: false}).setView([52.621615, 10.219470], 5);
+        map = L.map('map', {zoomControl: false, preferCanvas: true}).setView([52.621615, 10.219470], 5);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            maxZoom: 25
+            maxZoom: 25,
+            updateWhenIdle: true,
+            keepBuffer: 2,
+            referrerPolicy: 'strict-origin-when-cross-origin'
         }).addTo(map);
 
         L.control.zoom({position: 'topright'}).addTo(map);
         L.control.scale().addTo(map);
-        // goes to the fieldtrial_map.js
         startFieldTrialGIS(ft_json['results'][0]['results'], type_param);
         $('#map_buttons').show();
 
-        
-        function onLocationFound(e) {
-
-            map.removeLayer(location_layer_marker);
-            map.removeLayer(location_layer_circle);
-
-            location_layer_marker = new L.MarkerClusterGroup({});
-            location_layer_circle = new L.MarkerClusterGroup({});
-
-            var radius = e.accuracy;
-
-            L.marker(e.latlng)
-                .bindPopup("You are within " + radius + " meters from this point").openPopup().addTo(location_layer_marker);
-
-            L.circle(e.latlng, radius).addTo(location_layer_circle);
-
-            // markersGroup_current_location.addLayer(L.marker(e.latlng).bindPopup("You are within " + radius + " meters from this point").openPopup());
-            // markersGroup_current_location.addLayer(L.circle(e.latlng, radius));
-            map.addLayer(location_layer_marker);
-            map.addLayer(location_layer_circle);
-        }
-
         map.on('locationfound', onLocationFound);
-
-        function onLocationError(e) {
-            console.log(e.message);
-        }
-
         map.on('locationerror', onLocationError);
     }
 
-    let locateIntervalId;
+    function onLocationFound(e) {
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
 
-    function locate() {
-        // map.locate({setView: true, maxZoom: 16});
-        map.locate({setView: false});
-        // console.log("updated location");
+        location_layer_marker = new L.MarkerClusterGroup({});
+        location_layer_circle = new L.MarkerClusterGroup({});
+
+        L.marker(e.latlng)
+            .bindPopup('You are within ' + e.accuracy + ' meters from this point')
+            .openPopup()
+            .addTo(location_layer_marker);
+
+        L.circle(e.latlng, e.accuracy).addTo(location_layer_circle);
+        map.addLayer(location_layer_marker);
+        map.addLayer(location_layer_circle);
     }
 
+    function onLocationError(e) {
+        console.log(e.message);
+    }
+
+    function locate() {
+        map.locate({setView: false});
+    }
 
     function update_map_location() {
         map.locate({setView: true, maxZoom: 16});
-        // map.stopLocate();
+        clearInterval(locateIntervalId);
         locateIntervalId = setInterval(locate, 1000);
         $('#locationButton').html('<button type="button" class="btn btn-default" onclick="stop_update_map_location();">Stop Location</button>');
     }
@@ -270,12 +288,12 @@
     function stop_update_map_location() {
         clearInterval(locateIntervalId);
         $('#locationButton').html('<button type="button" class="btn btn-default" onclick="update_map_location();">My Location</button>');
-        map.removeLayer(location_layer_marker);
-        map.removeLayer(location_layer_circle);
+        if (location_layer_marker) {
+            map.removeLayer(location_layer_marker);
+        }
+        if (location_layer_circle) {
+            map.removeLayer(location_layer_circle);
+        }
     }
-
 </script>
-
 {% endblock %}
-
-
