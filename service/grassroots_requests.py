@@ -45,7 +45,7 @@ def call_grassroots_server (request, req_json, path):
         
         try:
             result = res.json()
-        except JSONDecodeError as e:
+        except json.JSONDecodeError as e:
             print ("error decoding: " + r.text + " from " + url)
             print ("exception: ", e)
     else:
