@@ -420,6 +420,7 @@ function populateService(service_altname) {
             data: post_data,
             dataType: "json",
             success: function (json) {
+                console.
                 populate_page_with_json(json, false);
             }
         });
@@ -2056,7 +2057,6 @@ function add_plot_datatable(table_id) {
         if (name.includes('Accession')) {
             check_GRU_by_accession($(this).val(), name);
         }
-
     });
 }
 
@@ -2196,6 +2196,7 @@ function submit_form() {
             }
         });
     }
+
 }
 
 /**
@@ -2386,8 +2387,6 @@ function get_api_result(service, previousID) {
             }
         }
     });
-
-
 }
 
 
@@ -2573,7 +2572,7 @@ function display_result(json) {
                             extend: 'copyHtml5',
                             title: null,
                             messageTop: null,
-                            messageBottom: null,
+                            messageBottom: null,›
                             header: false,
                             exportOptions: {
                                 columns: [8, 10, 11]
@@ -2852,6 +2851,9 @@ function format_grassroots_search_result(this_result) {
                 author = author + ', ' + author_list[i];
             }
         }
+
+
+
         var description = json['so:description'];
         var url = json['so:url'];
         grassroots_search_html.push('<a style="color:#18bc9c ! important;" class="newstyle_link" href="' + url + '" target="_blank">' + img_html + ' ' + title + '</a><br/>');
@@ -3791,7 +3793,8 @@ function handleXlsxFileSelect(evt) {
                             return value !== undefined && value !== null && value !== '';
                         });
                     });
-
+                    console.log("plots "+plots);
+                
                     $('#PL_Uploaddropstatus').html('<span style="color:#18bc9c;">File: <b><i>' + filename + '</i></b> Processing done, ready to submit.</span>');
                     $('#PL_Upload_wrapper').hide();
                     console.log("FILENAME: " + filename);
