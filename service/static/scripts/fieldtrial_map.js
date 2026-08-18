@@ -329,7 +329,9 @@ function produceFieldtrialTable(data, type_param) {
             {
                 title: "Team",
                 "render": function (data, type, full, meta) {
-                    return SafePrint(full['parent_field_trial']['team']);
+                     if (full['parent_field_trial']['team'] !==undefined)
+                         return SafePrint(full['parent_field_trial']['team']);
+                     return '';
                 }
             },
             {
