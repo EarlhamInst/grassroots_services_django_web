@@ -227,8 +227,6 @@ $(document).ready(function(){
 
 
 <section id="user_details">
-		<!--		<strong> Logged in as {{ request.META|get_logged_in_user_email }} </strong> -->
-		
 		{% if user %}
 		<strong> Logged in as {{ user.email }} </strong> 
 		{% else %}
@@ -236,7 +234,7 @@ $(document).ready(function(){
 		{% endif %}
 </section>
 
-</section>
+
 
 
 
