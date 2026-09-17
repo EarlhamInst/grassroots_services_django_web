@@ -41,12 +41,13 @@ def call_grassroots_server (request, req_json, path):
 
     if url is not None:
         print (">>>> calling url " + url)
-        res = requests.post (url, data = json.dumps (req_json), headers = request.headers)
+        req_data = json.dumps (req_json)
+        res = requests.post (url, data = req_data, headers = request.headers)
         
         try:
             result = res.json()
         except json.JSONDecodeError as e:
-            print ("error decoding: " + request.text + " from " + url)
+            print ("error decoding: " + req_data + " from " + url)
             print ("exception: ", e)
     else:
         print (">>>> no url for " + path)
