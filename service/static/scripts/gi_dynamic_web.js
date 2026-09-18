@@ -2572,7 +2572,7 @@ function display_result(json) {
                             extend: 'copyHtml5',
                             title: null,
                             messageTop: null,
-                            messageBottom: null,›
+                            messageBottom: null,
                             header: false,
                             exportOptions: {
                                 columns: [8, 10, 11]

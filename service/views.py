@@ -49,6 +49,21 @@ def queen_index (request):
   return real_index (request, "queen")
 
 
+def get_user (response_json):
+  user = None
+  
+  if response_json: 
+    if "user" in response_json:
+      user = response_json ["user"]
+      # Django doesn't like keys containing colons so add the non-colon versions of the values
+      if user ["so:email"] != None:
+        user ["email"] = user ["so:email"]
+  else:
+    print ("no response json") 
+     
+  return user
+        
+        
 def real_index (request, path):
   services = []
   user = None
@@ -58,12 +73,7 @@ def real_index (request, path):
   if service_list_json != None:
     services_json = service_list_json ["services"]  
         
-
-    if "user" in service_list_json:
-      user = service_list_json ["user"]
-      # Django doesn't like keys containing colons so add the non-colon versions of the values
-      if user ["so:email"] != None:
-        user ["email"] = user ["so:email"]
+    user = get_user (service_list_json)
 
 
     for service_json in services_json:
@@ -270,19 +280,40 @@ def queen_index_ajax(request):
 Get one named service
 '''
 def single_service(request, service_alt_name):
-    return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': ''})
+  return render_single_service (request, service_alt_name, 'public')
 
 '''
 Get one named private service
 '''
 def private_single_service(request, service_alt_name):
-    return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': 'private/'})
+  return render_single_service (request, service_alt_name, 'private/')
 
 '''
 Get one named queen service
 '''
 def queen_single_service(request, service_alt_name):
-    return render(request, 'service.html', {'service_alt_name': service_alt_name, 'private': 'queen/'})
+  return render_single_service (request, service_alt_name, 'queen/')
+
+
+def render_single_service (request, service_alt_name, server_path):
+  service_json = get_service (request, service_alt_name, server_path)
+  user = get_user (service_json)  
+  
+  if server_path == 'public':
+    server_path = ''
+    
+  print ("render_single_service")
+  print (service_json)
+  print ("service_alt_name: " + service_alt_name)
+  print ("server_path: " + server_path)
+  print ("user: ")
+  
+  # We need to convert the Python None values to null for the javasrcipt
+  service_json = json.dumps (service_json);
+  service_json = service_json.replace (": None", ": null");
+  
+  
+  return render (request, 'service.html', {'service_alt_name': service_alt_name, 'private': server_path, 'user': user, 'service_json': service_json})
 
 '''
 Get one named service with payload

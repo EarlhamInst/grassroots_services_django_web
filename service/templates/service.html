@@ -1,4 +1,5 @@
 {% include "header.html" %}
+    
 
 {% csrf_token %}
 <section id="services">
@@ -87,18 +88,19 @@
 
     var csrftoken = $('input[name$="csrfmiddlewaretoken"]').val();
     // change this to your URL (relative), has to be a local URL as JS restriction of cross domain
-    var services = '{"operations": {"operation":"get_all_services"}}';
-    var selected_service_name;
-    var response = null;
-    var parameters;
-    var groups;
-    var publicOrPrivate = '{{ private | safe }}';
-    $(document).ready(function () {
-        populateService('{{ service_alt_name | safe }}');
-        var yrtable;
 
-        var markersGroup;
-        var map;
+    $(document).ready(function () {
+		var service_json = {{ service_json | safe }};
+		
+		
+		/* 
+		 * For some reason, Xingdong made selected_service_name and publicOrPrivate global variables (????!) so 
+		 * we need to update them here.
+		 */
+		selected_service_name = "{{ service_alt_name }}";
+		publicOrPrivate = "{{ private }}";
+
+        populate_page_with_json (service_json, false);
 
     });
 

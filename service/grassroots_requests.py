@@ -20,11 +20,22 @@ def get_all_services (request, path):
 Get one service with an alternative name
 returns JSON from backend and send to the model
 '''
-def get_service(service_alt_name, str):
-    req_json = {"services": [{"so:alternateName": service_alt_name}], "operations": {"operation": "get_named_service"}}
-    result = call_grassroots_server (request, req_json, path)
+def get_service (request, service_alt_name, path):
+  req_json = {"services": [{"so:alternateName": service_alt_name}], "operations": {"operation": "get_named_service"}}
 
-    return result
+  print ("get_service: req_json:")
+  print (req_json)
+
+  # remove any trailing slash
+  if path.endswith ('/'):
+    path = path [:-1]
+    
+  result = call_grassroots_server (request, req_json, path)
+
+  print ("get_service: response:")
+  print (result)
+
+  return result
 
 
 
