@@ -1,0 +1,255 @@
+{% include "header.html" %}
+ {% load static %}
+<!--content-->
+<style type="text/css">
+    .modal-body {
+        height: 250px;
+        overflow-y: auto;
+    }
+
+    @media (min-height: 500px) {
+        .modal-body {
+            height: 400px;
+        }
+    }
+
+    @media (min-height: 800px) {
+        .modal-body {
+            height: 600px;
+        }
+    }
+    .carousel-button {
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        font-size: 24px;
+        padding: 10px;
+        top: 50%; /* Center vertically */
+        transform: translateY(-50%); /* Center vertically */
+        position: absolute;
+    }
+    
+    .carousel-button.left {
+        left: 50px; /* Adjust as necessary */
+    }
+    
+    .carousel-button.right {
+        right: 50px; /* Adjust as necessary */
+    }
+    
+    .image-carousel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative; /* Required for absolute positioning of children */
+    }
+    
+    .image-carousel .carouselImage {
+        width: 300px;  /* Fixed width, adjust as necessary */
+        height: auto;  /* Maintain aspect ratio */
+        display: block;
+    }
+
+    .image-container {
+        max-width: 100%;
+        text-align: center; // Centers the text and image
+        position: relative; // Needed for positioning elements inside it
+    }
+    
+    .image-title {
+        background-color: #fff; // White background for the text
+        color: #000; // Black text color
+        padding: 5px;
+        display: block;
+        width: 100%; // Take full width of the container
+        text-align: center;
+    }
+    
+	
+	table.plots td {
+		border-bottom-width: 0.125em;
+        border-bottom-style: solid;
+        border-bottom-color: #dee2e6;
+	} 
+	
+	table.plot {
+		padding: 5px;
+	}
+	
+	div.rack {
+		background-color: #ABEBC6;
+		cursor: pointer;
+		padding: 5px;
+	}
+
+    table.plots tr {
+        padding: 5px;
+
+    }
+
+    td.horizontal_block_gap {
+        padding-left: 30px;
+    }
+	
+    table.plots tr.vertical_block_gap td {
+        padding-top: 30px;
+    }
+
+    #plot_dialog {
+        display: revert;
+    }
+	
+</style>
+
+<script type="text/javascript">
+    var images = [
+        {% for url in imageUrls %}
+            "{{ url }}",
+        {% endfor %}
+    ];
+	
+</script>
+
+<section id="services" style="padding: 100px 0px 100px 0px ! important;">
+    <div class="container">
+        <!--style="width: 1170px ! important; margin-right: auto ! important; margin-left: auto ! important;">-->
+        <!--<div id="back_link" ><a href="/service/"><< Back to all services list</a><br/></div>-->
+        <h2 id="title">Field Trial Details</h2>
+
+        <p id="description"><br/>Study: <a href="/fieldtrial/study/{{ study_id|safe }}" target="_blank">{{ study_name|safe }}</a></p>
+        <p><a href="{% url 'downloads:download' filename=study_id %} ">Download csv file of plot data</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="#heatmap">Jump to Interactive heatmap visualisation.</a></p>
+
+
+
+	    </div>
+	</div>
+            
+        <div class="row" style="border-style: solid;border-width:1px;">
+	    <div class="col">
+		    
+                <div id="control" style="display: none; margin-left: 20px; padding:5px;">
+                    <br>
+                    Search:</br>
+                    <input type="text" id="searchPlotsInput" onkeyup="filter_plot();" value=""/></br><br/>
+                    <!--                        Phenotype:</br>-->
+                    <!--                        Height: <input type="text" id="height" value="117.25" disabled="disabled"/></br>-->
+                    <!--                        Yield: <input type="text" id="yield" value="8.91292789637138" disabled="disabled"/></br><br/>-->
+                    <!--                        GRU Accession: <input type="text" id="gruAccession" value="PW141-41-2-20-Q5B-NDVI-W"-->
+                    <!--                                              disabled="disabled"/></br>-->
+<!--                    <button onclick="filter_plot();">Filter</button>-->
+                    <div id="filter_result"></div>
+
+                    <!--                    </br></br></br></br>-->
+                    <!--                        <button>Get Data</button>-->
+                    </p>
+                </div>
+            
+	    </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal" tabindex="-1" role="dialog" id="plotModal" style="z-index: 999999;">
+            <div class="modal-dialog  modal-lg" role="document">
+                <div class="modal-content" style="z-index: 9999999;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Plot details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+		
+
+
+    </div>
+</section>
+
+		<dialog id="plot_dialog">
+		  <p>This dialog was opened using an invoker command.</p>
+		  <button commandfor="plot_dialog" id="close">Close</button>
+		</dialog>
+
+
+<section id="plots">
+
+  
+	<table class="plots">
+	{% for row in plot_rows %}
+		{% if plot_block_rows and forloop.counter0|divisibleby:plot_block_rows %}
+		    <tr class="vertical_block_gap">	
+		{% else %}
+		    <tr>	
+		{% endif %}			
+			
+			<td>{{ forloop.counter }}</td>
+				{% for plot in row %}
+                    {% if plot_block_columns and forloop.counter0|divisibleby:plot_block_columns %}
+                        <td class="plot horizontal_block_gap">	
+                    {% else %}
+                        <td class="plot">	
+                    {% endif %}
+
+                    <div class="rack">
+                        Row:{{ plot.row_index }}
+				        Column:{{ plot.column_index }}
+					</div>
+				</td>
+			{% endfor %}	
+		</tr>
+	{% endfor %}	
+	</table>
+	
+</section>
+
+
+<section id="heatmap">
+        <h4 id="title">Interactive heatmap</h4>
+<form action = "">
+<p> Select phenotype:
+<select name="singlePhenotype">
+<option selected="selected" disabled="disabled">Select phenotype</option>
+{% for key, value in dictTraits.items %}
+    <option value="{{ key }}">{{ value }}</option>
+{% endfor %}
+</select>
+<input type="submit" value="Submit">
+</p>
+</form>
+
+</section>
+
+<!--footer-->
+
+<script type="text/javascript">
+
+	// Open button opens a modal dialog
+	const plot_dialog = document.getElementById ("plot_dialog");
+	const racks = document.getElementsByClassName ("rack");
+
+    for (i = 0; i < racks.length; ++ i) {
+        racks [i].addEventListener ("click", () => {
+            plot_dialog.showModal ();
+        });
+    }
+
+		// Close button closes the dialog box
+			const closeButton = document.getElementById("close");
+
+	closeButton.addEventListener("click", () => {
+	  plot_dialog.close();
+	});
+</script>
+
+
+{% include "footer.html" %}

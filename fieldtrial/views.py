@@ -10,6 +10,8 @@ from plotly.offline import plot
 from plotly.graph_objs import Scatter
 from urllib.parse import urljoin
 
+from functools import cmp_to_key
+
 register = template.Library()
 
 
@@ -19,6 +21,7 @@ from django.http import HttpResponse
 from .grassroots_fieldtrial_requests import get_all_fieldtrials
 from .grassroots_fieldtrial_requests import get_fieldtrial
 from .grassroots_fieldtrial_requests import get_study
+from .grassroots_fieldtrial_requests import get_study_as_json
 from .grassroots_fieldtrial_requests import get_plot
 from .grassroots_fieldtrial_requests import search_fieldtrial
 
@@ -65,7 +68,7 @@ def single_study(request, study_id):
     base_url=settings.BASE_URL
     
     print (settings)
-    study = get_study(study_id)
+    study = get_study_as_json (study_id)
     result_json = json.loads (study)
     study_json = result_json ['results'][0]['results'][0]['data']
     
@@ -252,6 +255,78 @@ def single_plot(request, plot_id):
     #    'plot_div': plot_div, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
     return render(request, 'fieldtrial/plots.html', {'data': data, 'plot_id': plot_id, 'study_name': study_name, 
         'plot_div': plot_div, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
+
+
+
+
+'''
+One study's plots page request
+'''
+def plots_view (request, study_id):
+  study = get_study_as_json (study_id)
+
+
+  # study_text = json.dumps (study, indent = 2)
+  # print (study)
+
+  study_name = ""
+  if "so:name" in study:
+    study_name = study ["so:name"]
+
+  dictTraits = ""
+  imageUrls = ""
+    
+  num_rows = study ["num_rows"]  
+  num_columns = study ["num_columns"]	
+  plot_block_columns = study ["plot_block_columns"]
+  plot_block_rows = study ["plot_block_rows"]
+
+  if "plots" in study:
+    plots = study ["plots"]
+
+    # Get an array of plot rows where each 
+    # item on it is an array containing all of the 
+    # plots for that row index in column order
+    plot_rows = []
+    current_row = list ()
+    current_row_index = 1;
+    plot_rows.append (current_row)
+
+
+    for plot in plots:
+      row_index = plot ["row_index"]
+
+      if row_index != current_row_index:
+        current_row_index = row_index
+        current_row = list ()
+        plot_rows.append (current_row)
+
+      current_row.append (plot)
+
+
+  return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
+
+
+def ComparePlots (plot0, plot1):
+  res = 0;
+  val0 = plot0 ["row"]
+
+  if val0 is not None:
+    val1 = plot1 ["row"]
+
+    if val1 is not None:
+      res = val0 - val1
+
+  if res == 0:
+    val0 = plot0 ["column"]
+
+    if val0 is not None:
+      val1 = plot1 ["column"]
+
+      if val1 is not None:
+        res = val0 - val1
+
+  return res;
 
 '''
 Search field trial page request
