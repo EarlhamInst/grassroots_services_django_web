@@ -69,29 +69,28 @@ def single_study(request, study_id):
     
     print (settings)
     study = get_study_as_json (study_id)
-    result_json = json.loads (study)
-    study_json = result_json ['results'][0]['results'][0]['data']
     
-    if  "phenotypes" in study_json: 
-        phenotypes = result_json['results'][0]['results'][0]['data']['phenotypes']  # for CSV file
-    if  'plots' in study_json: 
-        plot_array = result_json['results'][0]['results'][0]['data']['plots']       # for CSV 
-    if  'treatment_factors' in study_json:
-        treatment_factors = result_json['results'][0]['results'][0]['data']['treatment_factors'] # for CSV
+
+    if  "phenotypes" in study: 
+        phenotypes = study ['phenotypes']  # for CSV file
+    if  'plots' in study: 
+        plot_array = study ['plots']       # for CSV 
+    if  'treatment_factors' in study:
+        treatment_factors = study ['treatment_factors'] # for CSV
 
     full_path=request.build_absolute_uri()
     
-    ft_id         = study_json['parent_field_trial']['_id']['$oid']
-    individual_id = study_json['_id']['$oid']
+    ft_id         = study['parent_field_trial']['_id']['$oid']
+    individual_id = study['_id']['$oid']
     
     N_t=0
     counters=[]
     flag=False
     ## number of treatment factors
-    if  study_json['treatment_factors']:
+    if  study['treatment_factors']:
         #print(len(study_json['treatment_factors']))
-        N_t = len(study_json['treatment_factors'])
-        value1 = study_json['treatment_factors']
+        N_t = len(study['treatment_factors'])
+        value1 = study['treatment_factors']
     
         #values per treatment. create array for nested for loop 
         for i in range(N_t):
@@ -100,7 +99,7 @@ def single_study(request, study_id):
             flag=True
    
     ## create CSV file /filedownload/Files for link grassroots.tools/download/ID 
-    if  "phenotypes" in study_json: 
+    if  "phenotypes" in study: 
         create_CSV(plot_array, phenotypes, treatment_factors, study_id)
 
     ### replace 'study' for 'plots' to create the link to the plots in given study ###
@@ -145,8 +144,8 @@ def single_study(request, study_id):
     print ("base_url: ", base_url)
 
     #return render(request, 'study.html', {'data': study, 'study_json': study_json, 'type': 'Grassroots:Study', 'path_plots':full_path_plots, 'ft_path':field_trial_link, 'N_treatments':range(N_t), 'counters':counters, 'flag':flag} )
-    return render(request, 'fieldtrial/study.html', {'data': study, 
-                                                     'study_json': study_json, 
+    return render(request, 'fieldtrial/study.html', {'data': json.dumps (study), 
+                                                     'study_json': study, 
                                                      'type': 'Grassroots:Study', 
                                                      'path_plots':full_path_plots, 
                                                      'ft_path':field_trial_link, 
@@ -301,10 +300,13 @@ def plots_view (request, study_id):
         current_row = list ()
         plot_rows.append (current_row)
 
+
+      # fill 
+
       current_row.append (plot)
 
 
-  return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
+  return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study': study, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
 
 
 def ComparePlots (plot0, plot1):

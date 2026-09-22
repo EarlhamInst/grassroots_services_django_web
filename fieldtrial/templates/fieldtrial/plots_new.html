@@ -201,7 +201,49 @@
                         <td class="plot">	
                     {% endif %}
 
-                    <div class="rack">
+                    <div class="rack" data-plot_row_index="{{ plot.row_index }}" data-plot_column_index="{{ plot.column_index }}"
+						{% if plot.study_design %}
+							data-study_design="{{ plot.study_design }}"
+						{% elif study.study_design %}
+							data-study_design="{{ study.study_design }}"
+						{% endif %}
+						
+						{% if plot.length %}
+							data-length="{{ plot.length }}"
+						{% elif study.plot_length %}
+							data-length="{{ study.plot_length }}"
+						{% endif %}
+						
+						{% if plot.width %}
+							data-width="{{ plot.width }}"
+						{% elif study.plot_width %}
+							data-width="{{ study.plot_width }}"
+						{% endif %}
+
+						{% if plot.sowing_date %}
+							data-sowing_date="{{ plot.sowing_date }}"
+						{% elif study.sowing_year %}
+							data-sowing_date="{{ study.sowing_year }}"
+						{% endif %}
+						
+						{% if plot.harvest_date %}
+							data-harvest_date="{{ plot.harvest_date }}"
+						{% elif study.harvest_year %}
+							data-harvest_date="{{ study.harvest_year }}"
+						{% endif %}
+
+						{% if plot.sowing_order %}
+							data-sowing_order="{{ plot.sowing_order }}"
+						{% endif %}
+						
+						{% if plot.walking_order %}
+							data-walking_order="{{ plot.walking_order }}"
+						{% endif %}					
+						
+						{% if plot.comment %}
+							data-comment="{{ plot.comment }}"
+						{% endif %}						
+											>
                         Row:{{ plot.row_index }}
 				        Column:{{ plot.column_index }}
 					</div>

@@ -371,7 +371,7 @@
     var location_layer_marker = new L.MarkerClusterGroup({});
     var location_layer_circle = new L.MarkerClusterGroup({});
 
-    function start_map(ft_json, type_param) {
+    function start_map(study, type_param) {
         $('#simpleAdvanceWrapper').hide();
         $('#status').html('');
         $('#form').html('');
@@ -390,11 +390,11 @@
         L.control.zoom({position: 'topright'}).addTo(map);
         L.control.scale().addTo(map);
 
-        startFieldTrialGIS(ft_json['results'][0]['results'], type_param);
+        startFieldTrialGIS(study, type_param);
         $('#map_buttons').show();
-        if (ft_json['results'][0]['results'][0]['data']['address'] !== undefined) {
-            var la = ft_json['results'][0]['results'][0]['data']['address']['address']['location']['centre']['latitude'];
-            var lo = ft_json['results'][0]['results'][0]['data']['address']['address']['location']['centre']['longitude'];
+        if (study['address'] !== undefined) {
+            var la = study['address']['address']['location']['centre']['latitude'];
+            var lo = study['address']['address']['location']['centre']['longitude'];
             map.setView([la, lo], 16, {animate: true});
         }
         function onLocationFound(e) {
