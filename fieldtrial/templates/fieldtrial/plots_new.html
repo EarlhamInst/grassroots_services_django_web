@@ -76,11 +76,21 @@
 		padding: 5px;
 	}
 	
-	div.rack {
+	.rack {
 		background-color: #ABEBC6;
 		cursor: pointer;
 		padding: 5px;
 		margin: 5px;
+	}
+
+	.discard {
+		background-color: #B84840;
+		color: white;
+	}
+
+	.blank {
+		background-color: #6A64DE;
+		color: white;
 	}
 
     table.plots tr {
@@ -97,7 +107,19 @@
     }
 
     #plot_dialog {
-        display: revert;
+			display: revert;
+				
+			width: 80vw;
+
+			&::backdrop {
+				background: hsl(0 0 0 / .5);
+				backdrop-filter: blur(5px);
+			}
+					
+			&[open] {
+				border: 0;
+				border-radius: 12px;
+			}
     }
 	
 </style>
@@ -131,9 +153,9 @@
 	    <div class="col">
 		    
                 <div id="control" style="display: none; margin-left: 20px; padding:5px;">
-                    <br>
-                    Search:</br>
-                    <input type="text" id="searchPlotsInput" onkeyup="filter_plot();" value=""/></br><br/>
+                    <br />
+                    Search:<br />
+                    <input type="text" id="searchPlotsInput" onkeyup="filter_plot();" value=""/><br /><br />
                     <!--                        Phenotype:</br>-->
                     <!--                        Height: <input type="text" id="height" value="117.25" disabled="disabled"/></br>-->
                     <!--                        Yield: <input type="text" id="yield" value="8.91292789637138" disabled="disabled"/></br><br/>-->
@@ -144,7 +166,6 @@
 
                     <!--                    </br></br></br></br>-->
                     <!--                        <button>Get Data</button>-->
-                    </p>
                 </div>
             
 	    </div>
@@ -176,8 +197,23 @@
     </div>
 </section>
 
-		<dialog id="plot_dialog">
-		  <p>This dialog was opened using an invoker command.</p>
+		<dialog id="plot_dialog">			
+ <!--    	<div class="row justify-content-between"> -->
+    		<ul class="col-4">
+    			<li id="modal_plot_id">Plot ID: <span id="modal_plot_id_value"> <span> </li>
+    			<li id="modal_row">Row: <span id="modal_row_value"> <span> </li>
+    			<li id="modal_column">Column: <span id="modal_column_value"> <span> </li>
+    			<li id="modal_length">Length: <span id="modal_length_value"> <span> </li>
+    			<li id="modal_width">Width: <span id="modal_width_value"> <span> </li>
+    			<li id="modal_study_design">Study Design: <span id="modal_study_design_value"> <span> </li>
+    			<li id="modal_sowing_date">Sowing Date: <span id="modal_sowing_date_value"> <span> </li>
+    			<li id="modal_harvest_date">Harvest Date: <span id="modal_harvest_date_value"> <span> </li>
+    			<li id="modal_sowing_order">Sowing Order: <span id="modal_sowing_order_value"> <span> </li>
+    			<li id="modal_walking_order">Walking Order: <span id="modal_walking_order_value"> <span> </li>
+    			<li id="modal_comment">Comment: <span id="modal_comment_value"> <span> </li>
+				</ul>
+				<!-- ></div> -->
+				
 		  <button commandfor="plot_dialog" id="close">Close</button>
 		</dialog>
 
@@ -195,13 +231,40 @@
 			
 			<td>{{ forloop.counter }}</td>
 				{% for plot in row %}
-                    {% if plot_block_columns and forloop.counter0|divisibleby:plot_block_columns %}
-                        <td class="plot horizontal_block_gap">	
-                    {% else %}
-                        <td class="plot">	
-                    {% endif %}
+					{% if plot_block_columns and forloop.counter0|divisibleby:plot_block_columns %}
+          	<td class="plot horizontal_block_gap">	
+          {% else %}
+          	<td class="plot">	
+          {% endif %}
+					
+						
+						{% if plot.rows %} 
+						
+						 {% if plot.rows|length > 0 %}
+						 
+								{% if plot.rows.0.discard %}
+									<div class="rack discard" 
+								{% elif plot.rows.0.blank %}
+									<div class="rack blank" 								
+								{% else %}
+									<div class="rack" 								 
+								{% endif %}
+						
+								{% if plot.rows.0.study_index %}
+									data-plot_id="{{ plot.rows.0.study_index }}"
+								{% endif %}
+								
+						{% else %}
+							<div class-"PLOT ROWS LENGTH 0 {{ plot | safe }}"
+						{% endif %}
+								
+						{% else %}
+							<div class-"NO PLOT ROWS {{ plot | safe }}"
+						{% endif %}
 
-                    <div class="rack" data-plot_row_index="{{ plot.row_index }}" data-plot_column_index="{{ plot.column_index }}"
+						data-plot_row_index="{{ plot.row_index }}" data-plot_column_index="{{ plot.column_index }}"
+		         
+						
 						{% if plot.study_design %}
 							data-study_design="{{ plot.study_design }}"
 						{% elif study.study_design %}
@@ -281,8 +344,21 @@
 	const racks = document.getElementsByClassName ("rack");
 
     for (i = 0; i < racks.length; ++ i) {
-        racks [i].addEventListener ("click", () => {
-            plot_dialog.showModal ();
+        racks [i].addEventListener ("click", function (e) {
+					
+					document.getElementById ("modal_plot_id_value").innerHTML = this.dataset.plot_id ? this.dataset.plot_id : null;
+					document.getElementById ("modal_row_value").innerHTML = this.dataset.plot_row_index ? this.dataset.plot_row_index : null;
+					document.getElementById ("modal_column_value").innerHTML = this.dataset.plot_column_index ? this.dataset.plot_column_index : null;
+					document.getElementById ("modal_length_value").innerHTML = this.dataset.length ? this.dataset.length : null;
+					document.getElementById ("modal_width_value").innerHTML = this.dataset.width ? this.dataset.width : null;
+					document.getElementById ("modal_study_design_value").innerHTML = this.dataset.study_design ? this.dataset.study_design : null;
+					document.getElementById ("modal_sowing_date_value").innerHTML = this.dataset.sowing_date ? this.dataset.sowing_date : null;
+					document.getElementById ("modal_harvest_date_value").innerHTML = this.dataset.harvest_date ? this.dataset.harvest_date : null;
+					document.getElementById ("modal_sowing_order_value").innerHTML = this.dataset.sowing_order ? this.dataset.sowing_order : null;
+					document.getElementById ("modal_walking_order_value").innerHTML = this.dataset.walking_order ? this.dataset.walking_order : null;
+					document.getElementById ("modal_comment_value").innerHTML = this.dataset.comment ? this.dataset.comment : null;
+
+					plot_dialog.showModal ();
         });
     }
 
@@ -296,3 +372,4 @@
 
 
 {% include "footer.html" %}
+ 
