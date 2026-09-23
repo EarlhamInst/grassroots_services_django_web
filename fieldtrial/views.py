@@ -305,8 +305,34 @@ def plots_view (request, study_id):
 
       current_row.append (plot)
 
+  # Django doesn't like keys with . or : so 
+  # we'll convert the treatment factors here
+  treatments_django = None
+  
+  if study ["treatment_factors"]:
+    treatments_django = list ()
+	  
+    for tf in study ["treatment_factors"]:
+      treatment_django = {}
+      
+      if tf ["treatment"]:
+        treatment = tf ["treatment"]
+		
+        if treatment ["so:name"]:
+          treatment_django ["name"] = treatment ["so:name"]
 
-  return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study': study, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
+        if treatment ["so:description"]:
+          treatment_django ["description"] = treatment ["so:description"]	  
+
+        if treatment ["so:sameAs"]:
+          treatment_django ["url"] = treatment ["so:sameAs"]	
+
+    treatment_django ["values"] = tf ["values"]
+    
+    treatments_django.append (treatment_django)
+    
+    
+  return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study': study, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls, 'treatments': treatments_django})
 
 
 def ComparePlots (plot0, plot1):

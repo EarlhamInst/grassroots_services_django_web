@@ -84,7 +84,7 @@
 	}
 
 	.discard {
-		background-color: #B84840;
+		background-color: gray; //#B84840;
 		color: white;
 	}
 
@@ -120,7 +120,15 @@
 				border: 0;
 				border-radius: 12px;
 			}
+			
+			max-height: calc(100vh - 210px);
+			overflow-y:  scroll;;
+			overflow-x:  scroll;;
     }
+	
+	#plots {
+		overflow: scroll;
+	} 
 	
 </style>
 
@@ -198,7 +206,9 @@
 </section>
 
 		<dialog id="plot_dialog">			
+			<h3>Plot Details</h3>
  <!--    	<div class="row justify-content-between"> -->
+			<section>
     		<ul class="col-4">
     			<li id="modal_plot_id">Plot ID: <span id="modal_plot_id_value"> <span> </li>
     			<li id="modal_row">Row: <span id="modal_row_value"> <span> </li>
@@ -213,6 +223,68 @@
     			<li id="modal_comment">Comment: <span id="modal_comment_value"> <span> </li>
 				</ul>
 				<!-- ></div> -->
+				</section>
+				
+			<section>
+				<h3>Treatments</h3>
+				<table id="treatments" class="table">
+					<thead>
+						<tr>
+							<th>Treatment</th>
+							<th>Ontology term</th>
+							<th width="50%">Description</th>
+							<th>Values</th>
+						</tr>
+					</thead>
+					<tbody id="treatments_body">						
+						{% if treatments %}
+							{% for treatment in treatments %}
+							
+							<tr>
+								<td> 
+									{% if treatment.name %}
+										{{ treatment.name }}
+									{% endif %}	
+								</td>
+								
+								<td>
+									{% if treatment.url %}
+										<a class="newstyle_link" target="_blank" href='https://browser.planteome.org/amigo/term/{{ treatment.url }}"'>{{ treatment.url }}</a>
+									{% endif %}
+								</td>
+
+								<td>
+									{% if treatment.description %}
+										{{ treatment.description }}
+									{% endif %}											
+								</td>
+								
+								<td>
+									{% if treatment.values %}
+										<ul>
+											{% for tv in treatment.values %}
+												<li>{{ tv.Label }}: {{ tv.Value }}</li>
+											{% endfor %}
+										</ul>
+									{% endif %}											
+								</td>
+								
+							</tr>
+
+							{% endfor %}
+						
+						{% endif %}
+						
+
+					</tbody>
+				</table>
+				
+			</section>
+
+			<section>
+				<h3>Rows</h3>
+			</section>
+
 				
 		  <button commandfor="plot_dialog" id="close">Close</button>
 		</dialog>
