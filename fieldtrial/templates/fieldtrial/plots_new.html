@@ -141,7 +141,7 @@
 	
 </script>
 
-<section id="services" style="padding: 100px 0px 100px 0px ! important;">
+<section id="services">
     <div class="container">
         <!--style="width: 1170px ! important; margin-right: auto ! important; margin-left: auto ! important;">-->
         <!--<div id="back_link" ><a href="/service/"><< Back to all services list</a><br/></div>-->
@@ -178,28 +178,6 @@
             
 	    </div>
         </div>
-
-        <!-- Modal -->
-        <div class="modal" tabindex="-1" role="dialog" id="plotModal" style="z-index: 999999;">
-            <div class="modal-dialog  modal-lg" role="document">
-                <div class="modal-content" style="z-index: 9999999;">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Plot details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-		
 
 
     </div>
@@ -283,6 +261,53 @@
 
 			<section>
 				<h3>Rows</h3>
+				
+					<table class="table racks">
+						<thead>
+							<tr>
+								<th>Replicate</th>
+								<th>Rack</th>
+								<th>Accession</th>
+								<th>Pedigree</th>
+								<th>Links</th>
+								<th>Treatments</th>
+							</tr>
+						</thead>
+						<tbody id="rows_body">
+						</tbody>
+					</table>
+					
+    				
+			</section>
+
+			<section>
+				<h3>Phenotypes</h3>
+
+				<table class="table plots">
+					<thead>
+						<tr>
+							<th>Replicate</th>
+							<th>Rack</th>
+							<th>Date</th>
+							<th>Raw Value</th>
+							<th>Corrected Value</th>
+							<th>Raw Value Replicate</th>
+							<th>Raw Value Replicate</th>
+							<th>Trait</th>
+							<th>Measurement</th>
+							<th>Unit</th>
+							<th>Index</th>
+							<th>Comment</th>
+						</tr>
+					</thead>
+					<tbody id="phenotypes_body">
+						
+					</tbody>	 
+
+				</table>
+				
+  
+
 			</section>
 
 				
@@ -301,7 +326,8 @@
 		    <tr>	
 		{% endif %}			
 			
-			<td>{{ forloop.counter }}</td>
+		
+			<td>{{ row.0.row_index }}</td>
 				{% for plot in row %}
 					{% if plot_block_columns and forloop.counter0|divisibleby:plot_block_columns %}
           	<td class="plot horizontal_block_gap">	
@@ -377,7 +403,21 @@
 						
 						{% if plot.comment %}
 							data-comment="{{ plot.comment }}"
-						{% endif %}						
+						{% endif %}
+						
+						{% if plot.rows %}
+							{% for row in plot.rows %}
+								
+								{% if row.observations %}
+									{% for obs in row.observations %}
+									
+									{% endfor %}														
+								{% endif %}
+							
+							{% endfor %}						
+						{% endif %}
+						
+												
 											>
                         Row:{{ plot.row_index }}
 				        Column:{{ plot.column_index }}

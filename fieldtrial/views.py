@@ -300,9 +300,6 @@ def plots_view (request, study_id):
         current_row = list ()
         plot_rows.append (current_row)
 
-
-      # fill 
-
       current_row.append (plot)
 
   # Django doesn't like keys with . or : so 
@@ -313,6 +310,10 @@ def plots_view (request, study_id):
     treatments_django = list ()
 	  
     for tf in study ["treatment_factors"]:
+      print ("**** begin tf")
+      print (tf)
+      print ("**** end tf")
+      
       treatment_django = {}
       
       if tf ["treatment"]:
@@ -327,10 +328,11 @@ def plots_view (request, study_id):
         if treatment ["so:sameAs"]:
           treatment_django ["url"] = treatment ["so:sameAs"]	
 
-    treatment_django ["values"] = tf ["values"]
+        treatment_django ["values"] = tf ["values"]
     
-    treatments_django.append (treatment_django)
-    
+        treatments_django.append (treatment_django)
+
+  plot_rows.reverse ()
     
   return render(request, 'fieldtrial/plots_new.html', {'study_id': study_id, 'study': study, 'study_name': study_name, 'plot_block_columns': plot_block_columns, 'plot_block_rows': plot_block_rows, 'plot_rows': plot_rows, 'dictTraits':dictTraits, 'imageUrls':imageUrls, 'treatments': treatments_django})
 

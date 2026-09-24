@@ -188,7 +188,8 @@
         $('#plots').html(loadingImage);
         initialiseHarvestYearSlider();
         runWhenBrowserIdle(function () {
-            start_map(JSON.parse('{{ data|escapejs }}'), '{{ type|escapejs }}');
+			let studies_json = JSON.parse("{{ data|escapejs }}");
+            start_map (studies_json, '{{ type|escapejs }}');
             $('#result').empty();
         });
     });
