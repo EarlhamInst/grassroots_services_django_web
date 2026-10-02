@@ -97,11 +97,14 @@ def format_curator(dictionary, keys, default=None):
     email =  reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
 
     curator_name = name
-     
+    
+		if curator_name == None:
+			curator_name = ""    
+    
     if email != "" and email != None :
         curator_name='<a href="mailto:'+ email + '">' + curator_name +'</a>'
         curator_name = mark_safe(curator_name)
-
+      
     return (curator_name) 
 
 
@@ -113,6 +116,9 @@ def format_contact(dictionary, keys, default=None):
     email =  reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
 
     contact_name = name
+
+		if contact_name == None:
+			contact_name = ""
      
     if email != "" and email != None :
         contact_name='<a href="mailto:'+ email + '">' + contact_name +'</a>'
