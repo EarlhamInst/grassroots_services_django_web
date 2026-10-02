@@ -117,8 +117,8 @@ def format_contact(dictionary, keys, default=None):
 
     contact_name = name
 
-		if contact_name == None:
-			contact_name = ""		
+    if contact_name == None:
+      contact_name = ""		
      
     if email != "" and email != None :
         contact_name='<a href="mailto:'+ email + '">' + contact_name +'</a>'
