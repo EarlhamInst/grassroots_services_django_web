@@ -17,6 +17,7 @@ register = template.Library()
 
 from django.http import HttpResponse
 from .grassroots_fieldtrial_requests import get_all_fieldtrials
+from .grassroots_fieldtrial_requests import get_all_fieldtrials_mongo
 from .grassroots_fieldtrial_requests import get_fieldtrial
 from .grassroots_fieldtrial_requests import get_study
 from .grassroots_fieldtrial_requests import get_plot
@@ -47,8 +48,9 @@ def index_loading(request):
 Field trial index page request, with all field trials
 '''
 def index(request):
+    data = get_all_fieldtrials_mongo () 
     #return render(request, 'fieldtrial.html', {'data': get_all_fieldtrials, 'type': 'AllFieldTrials'})
-    return render(request, 'fieldtrial/fieldtrial.html', {'data': get_all_fieldtrials, 'type': 'AllFieldTrials'})
+    return render(request, 'fieldtrial/fieldtrial.html', {'data': data, 'type': 'AllFieldTrials'})
 
 '''
 One Field trial page request

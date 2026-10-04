@@ -41,6 +41,47 @@ def get_all_fieldtrials():
     res = requests.post(server_url, data=json.dumps(list_all_ft_request))
     return json.dumps(res.json())
 
+
+def get_all_fieldtrials_mongo():
+    list_all_ft_request = {
+        "services": [
+            {
+                "so:name": "Search Field Trials",
+                "start_service": True,
+                "parameter_set": {
+                    "level": "advanced",
+                    "parameters": [
+                      {
+                        "param": "ST Search Studies",
+                        "current_value": True,
+                        "group": "Studies"
+                      },
+                      {
+                        "param": "Get all studies",
+                        "current_value": True,
+                        "group": "Studies"
+                      },
+                      {
+                        "param": "The level of data to get for matching Studies",
+                        "current_value": "Metadata",
+                        "group": "Studies"
+                       },
+                        {
+                            "param": "FT Results Page Number",
+                            "current_value": 0
+                        },
+                        {
+                            "param": "FT Results Page Size",
+                            "current_value": 500
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    res = requests.post(server_url, data=json.dumps(list_all_ft_request))
+    return json.dumps(res.json())
+
 '''
 Search field trials with a given string
 returns JSON from backend and send to the model
