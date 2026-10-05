@@ -13,9 +13,9 @@ urlpatterns = [
     # single study/study_id
   path('study/<study_id>', views.single_study),
 
-    # single study's plots plots/study_id
-    #path('plots/<plot_id>', views.single_plot),
-  path('plots/<study_id>', views.plots_view),
+  # single study's plots plots/study_id
+  path('plots/<plot_id>', views.single_plot),
+  path('plots_new/<study_id>', views.plots_view),
 
 
     # get one field trial json
