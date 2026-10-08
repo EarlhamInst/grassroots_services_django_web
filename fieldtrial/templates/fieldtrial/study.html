@@ -215,8 +215,24 @@
     {% if "so:name" in study_json %}
        <tr><td><strong>Study Name:</strong></td> <td>{%lookup_keys study_json 'so:name'%}</td></tr>
     {% endif %}
+	
+	{% if "code" in study_json %}
+	   <tr><td><strong>Code:</strong></td><td> {% lookup_keys study_json "code" %}</td></tr>
+	{% endif %}
+	
     {% if "so:description" in study_json %}
     <tr><td><strong>Study Description:</strong></td><td>{% lookup_keys study_json "so:description" %}</td></tr>
+ {% endif %}
+ 
+ 
+ 
+    {% if "sowing_year" in study_json %}
+    <tr><td><strong>Sowing Year:</strong></td><td>{% lookup_keys study_json "sowing_year" %}</td></tr>
+ {% endif %}
+ 
+ 
+ {% if "harvest_year" in study_json %}
+    <tr><td><strong>Harvest Year:</strong></td><td>{% lookup_keys study_json "harvest_year" %}</td></tr>
  {% endif %}
  
  {% if "parent_program" in study_json %} 
