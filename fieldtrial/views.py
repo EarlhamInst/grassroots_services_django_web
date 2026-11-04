@@ -208,33 +208,37 @@ def single_plot(request, plot_id):
 
     matrices   = numpy_data(plot_array, phenotypes, selected_phenotype, total_rows, total_columns)
 
-    row     = matrices[0]
-    column  = matrices[1]
-    row_raw = matrices[2]
-    row_acc = matrices[3]
-    traitName = matrices[4]
-    units     = matrices[5]
-    plotID    = matrices[6]
+    if ((matrices != None) and (len (matrices) == 7)):        
+        row     = matrices[0]
+        column  = matrices[1]
+        row_raw = matrices[2]
+        row_acc = matrices[3]
+        traitName = matrices[4]
+        units     = matrices[5]
+        plotID    = matrices[6]
 
-    plotIDs      =  plotID.reshape(row,column)
-    accession    = row_acc.reshape(row,column)
-    #plotlyMatrix = row_raw.reshape(row,column) #reshape in plotly_div()
-    static    = row_raw.reshape(row,column)
+        plotIDs      =  plotID.reshape(row,column)
+        accession    = row_acc.reshape(row,column)
+       #plotlyMatrix = row_raw.reshape(row,column) #reshape in plotly_div()
+        static    = row_raw.reshape(row,column)
     
-    treatment=[]
-    if ( len(treatment_factors)>0):
-          treatment = treatments(plot_array, row, column)
+        treatment=[]
+        if ( len(treatment_factors)>0):
+              treatment = treatments(plot_array, row, column)
 
-     # Generate the observation dates matrix
-    dates = observation_dates(plot_array, row, column, selected_phenotype)
-    #print ("dates__________", dates)
-    # Check if all dates are "N/A"
-    if np.all(dates == "N/A"):
-        dates = []  # Empty list if all dates are "N/A"
+         # Generate the observation dates matrix
+        dates = observation_dates(plot_array, row, column, selected_phenotype)
+        #print ("dates__________", dates)
+        # Check if all dates are "N/A"
+        if np.all(dates == "N/A"):
+            dates = []  # Empty list if all dates are "N/A"
 
-    create_CSV(plot_array, phenotypes, treatment_factors, plot_id)
-    plot_div = plotly_plot(row_raw, accession, traitName, units, plotIDs, treatment, dates)
-    
+        create_CSV(plot_array, phenotypes, treatment_factors, plot_id)
+        plot_div = plotly_plot(row_raw, accession, traitName, units, plotIDs, treatment, dates)
+    else:
+      plot_div = ""  	
+    	
+    	
     data = plot
     imageUrls = []
     ## FIND IMAGES FOR CAROUSEL 

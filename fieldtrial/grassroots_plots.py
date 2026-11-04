@@ -337,22 +337,26 @@ def dict_phenotypes(pheno, plots):
     phenoDict = dict(zip(names, traits))    # dictionary for the dropdown menu options
 
     for j in range(len(plots)):
-        if ( 'discard' in plots[j]['rows'][0] ):
-            pass
-        if ( 'blank' in plots[j]['rows'][0] ):
-            pass
+        plot = plots [j]
+        if (('rows' in plot) and (len (plot['rows']) > 0)):
+            if ( 'discard' in plot['rows'][0] ):
+                pass
+            if ( 'blank' in plot['rows'][0] ):
+                pass
+            if ( 'guard' in plot['rows'][0] ):
+                pass
         
-        if ('observations' in plots[j]['rows'][0]):
-            for k in range(len(plots[j]['rows'][0]['observations'])):
-                if ('raw_value' in plots[j]['rows'][0]['observations'][k]):
-                    rawValue = plots[j]['rows'][0]['observations'][k]['raw_value']
-                if ('corrected_value' in plots[j]['rows'][0]['observations'][k]):
-                    rawValue = plots[j]['rows'][0]['observations'][k]['corrected_value']
-                if ( type(rawValue) == str):                # Remove values that are strings,e.g., dates. 
-                    name = plots[j]['rows'][0]['observations'][k]['phenotype']['variable']
-                    if ( name in phenoDict.keys() ):
-                        #print("check", phenoDict[name])
-                        del phenoDict[name]
+            if ('observations' in plots[j]['rows'][0]):
+                for k in range(len(plots[j]['rows'][0]['observations'])):
+                    if ('raw_value' in plots[j]['rows'][0]['observations'][k]):
+                        rawValue = plots[j]['rows'][0]['observations'][k]['raw_value']
+                    if ('corrected_value' in plots[j]['rows'][0]['observations'][k]):
+                        rawValue = plots[j]['rows'][0]['observations'][k]['corrected_value']
+                    if ( type(rawValue) == str):                # Remove values that are strings,e.g., dates. 
+                        name = plots[j]['rows'][0]['observations'][k]['phenotype']['variable']
+                        if ( name in phenoDict.keys() ):
+                            #print("check", phenoDict[name])
+                            del phenoDict[name]
 
             #break
 
@@ -363,6 +367,9 @@ def dict_phenotypes(pheno, plots):
 Create numpy arrays for plotly script. Matrix of raw values and matrix of accession 
 '''
 def numpy_data(json, pheno, current_name, total_rows, total_columns):
+    if (('rows' not in json[0]) or (len (json [0] ['rows']) == 0)):
+      return 
+     
     test=json[0]['rows'][0]['study_index']
 
     if  "No Data" in pheno:

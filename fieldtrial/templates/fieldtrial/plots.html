@@ -69,7 +69,70 @@
         width: 100%;
         text-align: center;
     }
-    
+
+    /* Plot images carousel, built from the "images" array of each plot */
+    #plot-images-section { padding: 10px 16px 0; border-bottom: 1px solid #dee2e6; }
+    .pic-viewer {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px 56px;
+    }
+    .pic-viewer a { display: block; }
+    .pic-viewer img {
+        max-width: 100%;
+        max-height: 300px;
+        display: block;
+        margin: 0 auto;
+    }
+    .pic-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 22px;
+        line-height: 40px;
+        padding: 0;
+        cursor: pointer;
+    }
+    .pic-nav:hover { background: rgba(0, 0, 0, 0.75); }
+    .pic-nav.prev { left: 8px; }
+    .pic-nav.next { right: 8px; }
+    .pic-caption {
+        text-align: center;
+        margin: 8px 0;
+    }
+    .pic-strip {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 4px 2px 8px;
+    }
+    .pic-strip img {
+        height: 70px;
+        width: auto;
+        flex: 0 0 auto;
+        cursor: pointer;
+        border: 3px solid transparent;
+        border-radius: 3px;
+        opacity: 0.7;
+    }
+    .pic-strip img:hover { opacity: 1; }
+    .pic-strip img.active {
+        border-color: #0d6efd;
+        opacity: 1;
+    }
+
 </style>
  
 {% endblock %}
@@ -110,7 +173,7 @@
 
 	    </div>
 	</div>
-            
+
         <div class="row" style="border-style: solid;border-width:1px;">
 	    <div class="col">
 		    
@@ -143,6 +206,18 @@
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
+            </div>
+            <!-- Images for the plot currently shown in the modal; filled by plotImagesCarousel -->
+            <div id="plot-images-section" style="display: none;">
+                <div class="pic-viewer">
+                    <button type="button" class="pic-nav prev" aria-label="Previous image" onclick="plotImagesCarousel.step(-1);">&#8249;</button>
+                    <a id="pic-main-link" href="#" target="_blank" rel="noopener" title="Open full size image">
+                        <img id="pic-main-image" src="" alt=""/>
+                    </a>
+                    <button type="button" class="pic-nav next" aria-label="Next image" onclick="plotImagesCarousel.step(1);">&#8250;</button>
+                </div>
+                <div id="pic-caption" class="pic-caption"></div>
+                <div id="pic-strip" class="pic-strip"></div>
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- Modal body content here -->
@@ -191,10 +266,173 @@
  
   <script type="text/javascript">
     $(document).ready(function () {
+        const studyJson = {{ data|safe }};
         $('#plots').html('<img src="{% static 'images/ajax-loader.gif' %}"/>');
-        LoadTable({{ data|safe }});
+        LoadTable(studyJson);
+        plotImagesCarousel.init(studyJson);
     });
   </script>
+
+  <script type="text/javascript">
+    /*
+     * Carousel of the images attached to a plot via its "images" array.
+     * Each entry is either the client format {"contentUrl", "thumbnail"}
+     * or the storage format {"so:url", "so:thumbnail"}.
+     *
+     * The carousel lives inside #plotModal and is only shown while the
+     * modal is open for a plot that has images.
+     */
+    const plotImagesCarousel = {
+        /* plot id (both _id.$oid and study_index) -> array of {thumbnail, full} */
+        imagesByPlot: {},
+        items: [],
+        current: 0,
+
+        init: function (studyJson) {
+            let plots = [];
+
+            try {
+                plots = studyJson['results'][0]['results'][0]['data']['plots'] || [];
+            } catch (e) {
+                plots = [];
+            }
+
+            this.imagesByPlot = {};
+
+            plots.forEach((plot) => {
+                const images = plot['images'];
+
+                if (!Array.isArray(images)) {
+                    return;
+                }
+
+                const items = [];
+
+                images.forEach((image) => {
+                    const full = image['contentUrl'] || image['so:url'] || null;
+                    const thumbnail = image['thumbnail'] || image['so:thumbnail'] || full;
+
+                    if (thumbnail) {
+                        items.push({ thumbnail: thumbnail, full: full || thumbnail });
+                    }
+                });
+
+                if (items.length === 0) {
+                    return;
+                }
+
+                /* plotModal () is called with either of these ids depending on where it is clicked */
+                if (plot['_id'] && plot['_id']['$oid']) {
+                    this.imagesByPlot[plot['_id']['$oid']] = items;
+                }
+
+                const rows = plot['rows'];
+
+                if (rows && rows.length > 0 && rows[0]['study_index'] !== undefined) {
+                    this.imagesByPlot[String(rows[0]['study_index'])] = items;
+                }
+            });
+
+            /* Show the carousel whenever the modal is opened for a plot */
+            if (typeof plotModal === 'function') {
+                const originalPlotModal = plotModal;
+
+                plotModal = function (plotId) {
+                    plotImagesCarousel.load(plotId);
+                    return originalPlotModal.apply(this, arguments);
+                };
+            }
+
+            $('#plotModal').on('hidden.bs.modal', () => this.hide());
+        },
+
+        load: function (plotId) {
+            const strip = document.getElementById('pic-strip');
+            strip.innerHTML = '';
+
+            this.items = this.imagesByPlot[String(plotId)] || [];
+            this.current = 0;
+
+            if (this.items.length === 0) {
+                this.hide();
+                return;
+            }
+
+            this.items.forEach((item, i) => {
+                const img = document.createElement('img');
+                img.src = item.thumbnail;
+                img.alt = 'Image ' + (i + 1);
+                img.loading = 'lazy';
+                img.addEventListener('click', () => this.show(i));
+                strip.appendChild(img);
+            });
+
+            const single = (this.items.length === 1);
+            strip.style.display = single ? 'none' : '';
+            document.querySelectorAll('#plot-images-section .pic-nav').forEach((b) => {
+                b.style.display = single ? 'none' : '';
+            });
+
+            document.getElementById('plot-images-section').style.display = 'block';
+            this.show(0);
+        },
+
+        hide: function () {
+            document.getElementById('plot-images-section').style.display = 'none';
+            document.getElementById('pic-main-image').removeAttribute('src');
+            document.getElementById('pic-strip').innerHTML = '';
+            this.items = [];
+        },
+
+        show: function (index) {
+            const n = this.items.length;
+
+            if (n === 0) {
+                return;
+            }
+
+            this.current = ((index % n) + n) % n;
+            const item = this.items[this.current];
+
+            const img = document.getElementById('pic-main-image');
+            img.src = item.thumbnail;
+            img.alt = 'Image ' + (this.current + 1) + ' of ' + n;
+            document.getElementById('pic-main-link').href = item.full;
+
+            /* formatDateFromFilename () comes from carousel.js */
+            let date = '';
+
+            if (typeof formatDateFromFilename === 'function') {
+                date = formatDateFromFilename(item.full);
+            }
+
+            document.getElementById('pic-caption').textContent =
+                (date ? date + '  —  ' : '') + (this.current + 1) + ' of ' + n;
+
+            const strip = document.getElementById('pic-strip');
+            const thumbs = strip.children;
+
+            for (let i = 0; i < thumbs.length; ++ i) {
+                thumbs[i].classList.toggle('active', i === this.current);
+            }
+
+            /* keep the active thumbnail centred in the strip without scrolling the page */
+            const active = thumbs[this.current];
+
+            if (active) {
+                strip.scrollTo({
+                    left: active.offsetLeft - strip.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2,
+                    behavior: 'smooth'
+                });
+            }
+        },
+
+        step: function (direction) {
+            this.show(this.current + direction);
+        }
+    };
+  </script>
+
 
 {% endblock %}
 
