@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block all_styles_and_scripts %}
+{{ block.super }}
+<!-- formatDateFromFilename () for the image captions -->
+<script src="{% static 'fieldtrial/SCRIPTS/carousel.js' %}"></script>
+<style type="text/css">
+    .plot-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 24px;
+        margin: 0 0 16px;
+        padding: 0;
+        list-style: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="height: 20px;"></div>
+<section id="services" style="padding: 100px 0px 40px 0px ! important;">
+    <div class="container">
+        <h2 id="title">Plot Images</h2>
+
+        <p id="description"><br/>Study:
+            <a href="/fieldtrial/study/{{ study_id }}" target="_blank">{{ study_name }}</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/fieldtrial/plots/{{ study_id }}">Back to the plots</a>
+        </p>
+
+        {% if plot_found %}
+            <ul class="plot-details">
+                {% if details.study_index is not None %}<li><strong>Plot:</strong> {{ details.study_index }}</li>{% endif %}
+                {% if details.row is not None %}<li><strong>Row:</strong> {{ details.row }}</li>{% endif %}
+                {% if details.column is not None %}<li><strong>Column:</strong> {{ details.column }}</li>{% endif %}
+                {% if details.accession %}<li><strong>Accession:</strong> {{ details.accession }}</li>{% endif %}
+                <li><strong>Images:</strong> {{ images|length }}</li>
+            </ul>
+
+            {% include 'fieldtrial/plot_images_grid.html' with images=images %}
+        {% else %}
+            <p>Could not find plot "{{ plot_ref }}" in this study.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

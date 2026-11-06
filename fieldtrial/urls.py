@@ -16,6 +16,9 @@ urlpatterns = [
     # single study's plots plots/study_id
     path('plots/<plot_id>', views.single_plot),
 
+    # all of the images for one plot in a study: plots/study_id/plot_id_or_study_index/images
+    path('plots/<study_id>/<plot_ref>/images', views.single_plot_images, name='plot_images'),
+
     # get one field trial json
     path('ajax/get_fieldtrial/', views.search_fieldtrial),
 

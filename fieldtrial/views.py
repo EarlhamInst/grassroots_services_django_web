@@ -259,6 +259,95 @@ def single_plot(request, plot_id):
     return render(request, 'fieldtrial/plots.html', {'data': data, 'plot_id': plot_id, 'study_name': study_name, 
         'plot_div': plot_div, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
 
+def get_plot_images(plot):
+    """
+    Normalise the "images" array of a plot into a list of
+    {"thumbnail": ..., "full": ...} dicts. Each entry may be in the client
+    format {"contentUrl", "thumbnail"} or the storage format
+    {"so:url", "so:thumbnail"}. A lone "so:image" on the plot is used as a
+    fallback if there is no "images" array.
+    """
+    images = []
+    entries = plot.get('images')
+
+    if not isinstance(entries, list):
+        entries = []
+
+    if not entries and plot.get('so:image'):
+        entries = [{'so:url': plot.get('so:image'), 'so:thumbnail': plot.get('so:thumbnail')}]
+
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+
+        full = entry.get('contentUrl') or entry.get('so:url')
+        thumbnail = entry.get('thumbnail') or entry.get('so:thumbnail') or full
+
+        if thumbnail:
+            images.append({'thumbnail': thumbnail, 'full': full or thumbnail})
+
+    return images
+
+
+def find_plot(plot_array, plot_ref):
+    """
+    Find a plot by either its _id.$oid or the study_index of its first row,
+    matching the ids that plotModal () is called with.
+    """
+    for plot in plot_array:
+        oid = (plot.get('_id') or {}).get('$oid')
+
+        if oid is not None and oid == plot_ref:
+            return plot
+
+        rows = plot.get('rows') or []
+
+        if rows and str(rows[0].get('study_index')) == plot_ref:
+            return plot
+
+    return None
+
+
+'''
+Grid of all of the images for a single plot within a study
+'''
+def single_plot_images(request, study_id, plot_ref):
+    plot_json = json.loads(get_plot(study_id))
+    study_name = ''
+    plot = None
+
+    try:
+        study_data = plot_json['results'][0]['results'][0]['data']
+        study_name = study_data.get('so:name', '')
+        plot = find_plot(study_data.get('plots') or [], plot_ref)
+    except (KeyError, IndexError, TypeError):
+        study_data = None
+
+    images = []
+    details = {}
+
+    if plot:
+        images = get_plot_images(plot)
+        rows = plot.get('rows') or []
+        first_row = rows[0] if rows else {}
+
+        details = {
+            'study_index': first_row.get('study_index'),
+            'row': plot.get('row_index'),
+            'column': plot.get('column_index'),
+            'accession': (first_row.get('material') or {}).get('accession'),
+        }
+
+    return render(request, 'fieldtrial/plot_images.html', {
+        'study_id': study_id,
+        'study_name': study_name,
+        'plot_ref': plot_ref,
+        'plot_found': plot is not None,
+        'details': details,
+        'images': images,
+    })
+
+
 '''
 Search field trial page request
 '''

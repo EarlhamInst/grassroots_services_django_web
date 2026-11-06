@@ -218,6 +218,7 @@
                 </div>
                 <div id="pic-caption" class="pic-caption"></div>
                 <div id="pic-strip" class="pic-strip"></div>
+                <p class="pic-caption"><a id="pic-grid-link" href="#" target="_blank" rel="noopener">View all images for this plot</a></p>
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- Modal body content here -->
@@ -372,6 +373,9 @@
             document.querySelectorAll('#plot-images-section .pic-nav').forEach((b) => {
                 b.style.display = single ? 'none' : '';
             });
+
+            document.getElementById('pic-grid-link').href =
+                '/fieldtrial/plots/{{ plot_id|urlencode }}/' + encodeURIComponent(plotId) + '/images';
 
             document.getElementById('plot-images-section').style.display = 'block';
             this.show(0);

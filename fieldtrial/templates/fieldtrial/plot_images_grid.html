@@ -1,0 +1,91 @@
+{% comment %}
+    Reusable grid of a plot's images.
+
+    Expects "images": a list of {"thumbnail": url, "full": url} dicts as built
+    by views.get_plot_images () from the plot's "images" array.
+
+    Usage: {% include 'fieldtrial/plot_images_grid.html' with images=images %}
+{% endcomment %}
+<style type="text/css">
+    .plot-images-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .plot-images-grid .plot-image-tile {
+        /* grow to fill the row, but never narrower than 200px */
+        flex: 1 1 200px;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .plot-images-grid .plot-image-tile a {
+        display: block;
+        aspect-ratio: 4 / 3;
+        background: #e9e9e9;
+    }
+
+    .plot-images-grid .plot-image-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    .plot-images-grid .plot-image-tile a:hover img {
+        opacity: 0.85;
+    }
+
+    .plot-images-grid .plot-image-caption {
+        padding: 6px 8px;
+        font-size: 0.85em;
+        text-align: center;
+        color: #333;
+        background: #fff;
+    }
+
+    @media (max-width: 480px) {
+        .plot-images-grid .plot-image-tile {
+            flex-basis: 100%;
+            max-width: none;
+        }
+    }
+</style>
+
+{% if images %}
+<ul class="plot-images-grid">
+    {% for image in images %}
+    <li class="plot-image-tile">
+        <a href="{{ image.full }}" target="_blank" rel="noopener" title="Open full size image">
+            <img src="{{ image.thumbnail }}" alt="Plot image {{ forloop.counter }} of {{ images|length }}" loading="lazy"/>
+        </a>
+        <div class="plot-image-caption" data-full-url="{{ image.full }}">{{ forloop.counter }} of {{ images|length }}</div>
+    </li>
+    {% endfor %}
+</ul>
+
+<script type="text/javascript">
+    /* Prefix each caption with the date taken from the filename, if carousel.js is loaded */
+    if (typeof formatDateFromFilename === 'function') {
+        document.querySelectorAll('.plot-images-grid .plot-image-caption').forEach((caption) => {
+            const date = formatDateFromFilename(caption.dataset.fullUrl);
+
+            if (date) {
+                caption.textContent = date + '  —  ' + caption.textContent;
+            }
+        });
+    }
+</script>
+{% else %}
+<p class="plot-images-empty">There are no images for this plot.</p>
+{% endif %}
