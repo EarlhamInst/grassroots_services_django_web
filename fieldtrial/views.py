@@ -280,11 +280,18 @@ def get_plot_images(plot):
         if not isinstance(entry, dict):
             continue
 
-        full = entry.get('contentUrl') or entry.get('so:url')
-        thumbnail = entry.get('thumbnail') or entry.get('so:thumbnail') or full
+        image = {}
 
-        if thumbnail:
-            images.append({'thumbnail': thumbnail, 'full': full or thumbnail})
+        image ["full"] = entry.get('contentUrl') or entry.get('so:url')
+        image ["thumbnail"] = entry.get('thumbnail') or entry.get('so:thumbnail') or full
+        image ["date"] = entry.get ('datePublished')     
+        image ["index"] = entry.get ('index')
+        image ["wavelength"] = entry.get ('wavelength')
+
+        image ["entry"] = entry
+
+        if image ["thumbnail"]:
+            images.append (image)
 
     return images
 

@@ -312,9 +312,19 @@
                 images.forEach((image) => {
                     const full = image['contentUrl'] || image['so:url'] || null;
                     const thumbnail = image['thumbnail'] || image['so:thumbnail'] || full;
-
+										const date = image ['so:date'];
+										const index = image ['index'];
+										const wavelength = image ['wavelength'];
+										
                     if (thumbnail) {
-                        items.push({ thumbnail: thumbnail, full: full || thumbnail });
+                        items.push (
+													{ 
+														thumbnail: thumbnail, 
+														full: full || thumbnail, 
+														date: date,
+														index: index,						
+														wavelength:wavelength							
+													});
                     }
                 });
 
@@ -404,11 +414,12 @@
             document.getElementById('pic-main-link').href = item.full;
 
             /* formatDateFromFilename () comes from carousel.js */
-            let date = '';
+            let date = item.date ? item.date : '';
 
-            if (typeof formatDateFromFilename === 'function') {
-                date = formatDateFromFilename(item.full);
-            }
+
+            //if (typeof formatDateFromFilename === 'function') {
+            //    date = formatDateFromFilename(item.full);
+            //}
 
             document.getElementById('pic-caption').textContent =
                 (date ? date + '  —  ' : '') + (this.current + 1) + ' of ' + n;

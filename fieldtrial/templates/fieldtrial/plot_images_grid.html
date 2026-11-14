@@ -69,9 +69,19 @@
         <a href="{{ image.full }}" target="_blank" rel="noopener" title="Open full size image">
             <img src="{{ image.thumbnail }}" alt="Plot image {{ forloop.counter }} of {{ images|length }}" loading="lazy"/>
         </a>
-        <div class="plot-image-caption" data-full-url="{{ image.full }}">{{ forloop.counter }} of {{ images|length }}</div>
+				
+				<div class="plot-image-caption" data-full-url="{{ image.full }}">{{ forloop.counter }} of {{ images|length }} </div>
+								
+        <div class="plot-image-caption">
+					<ul>
+						<li><strong>date</strong>: {{ image.date }}</li> 
+						<li><strong>index</strong>: {{ image.index }}</li> 
+						<li><strong>wavelength</strong>: {{ image.wavelength }}</li> 
+				  </ul>
+				</div>	
     </li>
-    {% endfor %}
+	
+		  {% endfor %}
 </ul>
 
 <script type="text/javascript">
