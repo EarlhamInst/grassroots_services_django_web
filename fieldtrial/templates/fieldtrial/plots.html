@@ -312,7 +312,7 @@
                 images.forEach((image) => {
                     const full = image['contentUrl'] || image['so:url'] || null;
                     const thumbnail = image['thumbnail'] || image['so:thumbnail'] || full;
-										const date = image ['so:date'];
+										const date = image ['datePublished'];
 										const index = image ['index'];
 										const wavelength = image ['wavelength'];
 										
@@ -421,8 +421,10 @@
             //    date = formatDateFromFilename(item.full);
             //}
 
-            document.getElementById('pic-caption').textContent =
-                (date ? date + '  —  ' : '') + (this.current + 1) + ' of ' + n;
+						let metadate_list = "
+						
+            document.getElementById('pic-caption').textContent = "Image " + (this.current + 1) + ' of ' + n;
+                (date ? date + ' Image   —  ' : '') + 
 
             const strip = document.getElementById('pic-strip');
             const thumbs = strip.children;

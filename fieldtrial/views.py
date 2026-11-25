@@ -259,7 +259,7 @@ def single_plot(request, plot_id):
     return render(request, 'fieldtrial/plots.html', {'data': data, 'plot_id': plot_id, 'study_name': study_name, 
         'plot_div': plot_div, 'dictTraits':dictTraits, 'imageUrls':imageUrls})
 
-def get_plot_images(plot):
+def get_plot_images(plot, image_name):
     """
     Normalise the "images" array of a plot into a list of
     {"thumbnail": ..., "full": ...} dicts. Each entry may be in the client
@@ -268,30 +268,44 @@ def get_plot_images(plot):
     fallback if there is no "images" array.
     """
     images = []
-    entries = plot.get('images')
+    image_sets = plot.get('images')
 
-    if not isinstance(entries, list):
-        entries = []
+    print (image_sets)
 
-    if not entries and plot.get('so:image'):
-        entries = [{'so:url': plot.get('so:image'), 'so:thumbnail': plot.get('so:thumbnail')}]
+    if not isinstance(image_sets, list):
+        image_sets = []
 
-    for entry in entries:
-        if not isinstance(entry, dict):
+    if not image_sets and plot.get('so:image'):
+        image_sets = [{'so:url': plot.get('so:image'), 'so:thumbnail': plot.get('so:thumbnail')}]
+
+    for image_set in image_sets:
+        if not isinstance (image_set, dict):
             continue
 
-        image = {}
+        print (">>> image_set: ")
+        print (image_set)
 
-        image ["full"] = entry.get('contentUrl') or entry.get('so:url')
-        image ["thumbnail"] = entry.get('thumbnail') or entry.get('so:thumbnail') or full
-        image ["date"] = entry.get ('datePublished')     
-        image ["index"] = entry.get ('index')
-        image ["wavelength"] = entry.get ('wavelength')
+        image_objects = image_set.get ("images")
+        if image_objects: 
+            requested_image_obj = None
 
-        image ["entry"] = entry
+			# find the image object with the given image name 			
+            for image_object in image_objects: 					
+                image_object_name =  image_object.get ("name")
 
-        if image ["thumbnail"]:
-            images.append (image)
+                if image_object_name:
+                    if image_object_name == image_name:
+                        requested_image_obj = {}
+                        full = image_object.get ('contentUrl') or image_set.get ('so:url')
+                        requested_image_obj ["contentUrl"] = full
+                        requested_image_obj ["thumbnailUrl"] = image_object.get('thumbnailUrl') or image_set.get('so:thumbnail') or full
+                        requested_image_obj ["date"] = image_object.get ('datePublished')     
+                        requested_image_obj ["index"] = image_set.get ('index')
+                        requested_image_obj ["wavelength"] = image_set.get ('wavelength')
+                        break;
+
+        if requested_image_obj:
+            images.append (requested_image_obj)
 
     return images
 
@@ -334,7 +348,7 @@ def single_plot_images(request, study_id, plot_ref):
     details = {}
 
     if plot:
-        images = get_plot_images(plot)
+        images = get_plot_images(plot, "rotated")
         rows = plot.get('rows') or []
         first_row = rows[0] if rows else {}
 

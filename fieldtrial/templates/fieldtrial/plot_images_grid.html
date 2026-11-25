@@ -1,3 +1,4 @@
+
 {% comment %}
     Reusable grid of a plot's images.
 
@@ -60,20 +61,26 @@
             max-width: none;
         }
     }
+		
+	ul.images-metadata {
+	    list-style-type: none;
+        text-align: left;
+        padding-left: 0;
+	}
 </style>
 
 {% if images %}
 <ul class="plot-images-grid">
     {% for image in images %}
     <li class="plot-image-tile">
-        <a href="{{ image.full }}" target="_blank" rel="noopener" title="Open full size image">
-            <img src="{{ image.thumbnail }}" alt="Plot image {{ forloop.counter }} of {{ images|length }}" loading="lazy"/>
+        <a href="{{ image.contentUrl }}" target="_blank" rel="noopener" title="Open full size image">
+            <img src="{{ image.thumbnailUrl }}" alt="Plot image {{ forloop.counter }} of {{ images|length }}" loading="lazy"/>
         </a>
 				
 				<div class="plot-image-caption" data-full-url="{{ image.full }}">{{ forloop.counter }} of {{ images|length }} </div>
 								
         <div class="plot-image-caption">
-					<ul>
+					<ul class="images-metadata">
 						<li><strong>date</strong>: {{ image.date }}</li> 
 						<li><strong>index</strong>: {{ image.index }}</li> 
 						<li><strong>wavelength</strong>: {{ image.wavelength }}</li> 
