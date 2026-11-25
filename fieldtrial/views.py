@@ -178,19 +178,19 @@ One study's plots page request
 '''
 def single_plot(request, plot_id):
     plot = get_plot(plot_id)
-    plot_json = json.loads(plot)
-    study_name = plot_json['results'][0]['results'][0]['data']['so:name']
-    study_data = plot_json ['results'][0]['results'][0]['data']
+    res_json = json.loads(plot)
+    study_data = res_json ['results'][0]['results'][0]['data']
 
-    plot_array = plot_json['results'][0]['results'][0]['data']['plots']     
-    treatment_factors = plot_json['results'][0]['results'][0]['data']['treatment_factors']
+    study_name = study_data ['so:name']
+    plot_array = study_data ['plots']     
+    treatment_factors = study_data ['treatment_factors']
 
-    total_rows    = plot_json['results'][0]['results'][0]['data']['num_rows']
-    total_columns = plot_json['results'][0]['results'][0]['data']['num_columns']
+    total_rows    = study_data ['num_rows']
+    total_columns = study_data ['num_columns']
 
 
     if  'phenotypes' in study_data:
-        phenotypes = plot_json['results'][0]['results'][0]['data']['phenotypes']  #
+        phenotypes = study_data ['phenotypes']  #
         dictTraits = dict_phenotypes(phenotypes, plot_array)  # dictionary to fill dropdown menu
         default_name = list(dictTraits.keys())[0]             # select first phenotype as default
     else:
@@ -270,7 +270,6 @@ def get_plot_images(plot, image_name):
     images = []
     image_sets = plot.get('images')
 
-    print (image_sets)
 
     if not isinstance(image_sets, list):
         image_sets = []
@@ -281,9 +280,6 @@ def get_plot_images(plot, image_name):
     for image_set in image_sets:
         if not isinstance (image_set, dict):
             continue
-
-        print (">>> image_set: ")
-        print (image_set)
 
         image_objects = image_set.get ("images")
         if image_objects: 
