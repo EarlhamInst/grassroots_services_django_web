@@ -300,31 +300,54 @@
 
             this.imagesByPlot = {};
 
-            plots.forEach((plot) => {
-                const images = plot['images'];
 
-                if (!Array.isArray(images)) {
+            //console.log (">>>> PLOTS: " + plots.length);
+
+            plots.forEach((plot) => {
+                const image_sets = plot ['images'];
+
+                //console.log (">>>> image sets: " + JSON.stringify (image_sets));
+
+                if (!Array.isArray (image_sets)) {
                     return;
                 }
 
                 const items = [];
 
-                images.forEach((image) => {
-                    const full = image['contentUrl'] || image['so:url'] || null;
-                    const thumbnail = image['thumbnailUrl'] || image['so:thumbnail'] || full;
-										const date = image ['datePublished'];
-										const index = image ['index'];
-										const wavelength = image ['wavelength'];
-										
-                    if (thumbnail) {
-                        items.push (
-													{ 
-														thumbnail: thumbnail, 
-														full: full || thumbnail, 
-														date: date,
-														index: index,						
-														wavelength:wavelength							
-													});
+                image_sets.forEach ((image_set) => {
+                    let image_objects = image_set ["images"];
+
+                    if (image_objects) {
+                        const index = image_set ['index'];
+                        const wavelength = image_set ['wavelength'];
+                    
+
+                        image_objects.forEach ((image_object) => {
+                            let image_name = image_object ["name"];
+
+                            if (image_name) {
+                                if (image_name === "rotated") {
+                                    const full = image_object['contentUrl'] || image_object['so:url'] || null;
+                                    const thumbnail = image_object['thumbnailUrl'] || image_object['so:thumbnail'] || full;
+                                    const date = image_object ['datePublished'];
+                                                        
+                                    if (thumbnail) {
+                                        let image_json = {
+                                            thumbnail: thumbnail, 
+                                            full: full || thumbnail, 
+                                            date: date,
+                                            index: index,						
+                                            wavelength:wavelength							
+                                        }
+
+                                        //console.log ("Added image " + JSON.stringify (image_json));
+                                        items.push (image_json);
+                                    }
+                                }
+                            }
+                        });
+                    
+                    
                     }
                 });
 
