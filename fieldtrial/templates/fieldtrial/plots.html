@@ -311,7 +311,7 @@
 
                 images.forEach((image) => {
                     const full = image['contentUrl'] || image['so:url'] || null;
-                    const thumbnail = image['thumbnail'] || image['so:thumbnail'] || full;
+                    const thumbnail = image['thumbnailUrl'] || image['so:thumbnail'] || full;
 										const date = image ['datePublished'];
 										const index = image ['index'];
 										const wavelength = image ['wavelength'];
@@ -421,10 +421,23 @@
             //    date = formatDateFromFilename(item.full);
             //}
 
-						let metadate_list = "
-						
-            document.getElementById('pic-caption').textContent = "Image " + (this.current + 1) + ' of ' + n;
-                (date ? date + ' Image   —  ' : '') + 
+            const metadata_list = [];
+
+            if (date) {
+                metadata_list.push(date);
+            }
+
+            if (item.index !== undefined && item.index !== null && item.index !== '') {
+                metadata_list.push('Index: ' + item.index);
+            }
+
+            if (item.wavelength !== undefined && item.wavelength !== null && item.wavelength !== '') {
+                metadata_list.push('Wavelength: ' + item.wavelength);
+            }
+
+            metadata_list.push('Image ' + (this.current + 1) + ' of ' + n);
+
+            document.getElementById('pic-caption').textContent = metadata_list.join('  —  ');
 
             const strip = document.getElementById('pic-strip');
             const thumbs = strip.children;
